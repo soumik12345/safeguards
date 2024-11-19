@@ -1,0 +1,22 @@
+[project]
+name = "guardrails-genie"
+version = "0.0.1"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-generativeai>=0.8.3",
+    "openai>=1.52.2",
+    "isort>=5.13.2",
+    "black>=24.10.0",
+    "ruff>=0.6.9",
+    "pip>=24.2",
+    "uv>=0.4.20",
+    "weave>=0.51.19",
+    "streamlit>=1.40.1",
+    "python-dotenv>=1.0.1",
+    "watchdog>=6.0.0",
+]
+
+[tool.setuptools]
+py-modules = ["guardrails_genie"]
