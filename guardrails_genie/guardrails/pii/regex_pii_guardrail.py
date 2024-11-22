@@ -12,11 +12,13 @@ class RegexPIIGuardrailResponse(BaseModel):
     detected_pii_types: Dict[str, list[str]]
     safe_to_process: bool
     explanation: str
+    anonymized_text: Optional[str] = None
 
 
 class RegexPIIGuardrail(Guardrail):
     regex_model: RegexModel
     patterns: Dict[str, str] = {}
+    should_anonymize: bool = False
     
     DEFAULT_PII_PATTERNS: ClassVar[Dict[str, str]] = {
         "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
@@ -31,7 +33,7 @@ class RegexPIIGuardrail(Guardrail):
         "zip_code": r"\b\d{5}(?:[-]\d{4})?\b"
     }
     
-    def __init__(self, use_defaults: bool = True, **kwargs):
+    def __init__(self, use_defaults: bool = True, should_anonymize: bool = False, **kwargs):
         patterns = {}
         if use_defaults:
             patterns = self.DEFAULT_PII_PATTERNS.copy()
@@ -42,7 +44,11 @@ class RegexPIIGuardrail(Guardrail):
         regex_model = RegexModel(patterns=patterns)
         
         # Initialize the base class with both the regex_model and patterns
-        super().__init__(regex_model=regex_model, patterns=patterns)
+        super().__init__(
+            regex_model=regex_model, 
+            patterns=patterns,
+            should_anonymize=should_anonymize
+        )
 
     @weave.op()
     def guard(self, prompt: str, **kwargs) -> RegexPIIGuardrailResponse:
@@ -71,9 +77,19 @@ class RegexPIIGuardrail(Guardrail):
             for pattern in result.failed_patterns:
                 explanation_parts.append(f"- {pattern}")
                 
+        # Add anonymization logic
+        anonymized_text = None
+        if getattr(self, 'should_anonymize', False) and result.matched_patterns:
+            anonymized_text = prompt
+            for pii_type, matches in result.matched_patterns.items():
+                for match in matches:
+                    replacement = f"[{pii_type.upper()}]"
+                    anonymized_text = anonymized_text.replace(match, replacement)
+                
         return RegexPIIGuardrailResponse(
             contains_pii=not result.passed,
             detected_pii_types=result.matched_patterns,
             safe_to_process=result.passed,
-            explanation="\n".join(explanation_parts)
+            explanation="\n".join(explanation_parts),
+            anonymized_text=anonymized_text
         )

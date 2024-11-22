@@ -4,7 +4,7 @@ import weave
 def run_regex_model():
     weave.init("guardrails-genie-pii-regex-model")
     # Create the guardrail
-    pii_guardrail = RegexPIIGuardrail(use_defaults=True)
+    pii_guardrail = RegexPIIGuardrail(use_defaults=True, should_anonymize=True)
 
     # Check a prompt
     prompt = "Please contact john.doe@email.com or call 123-456-7890"
