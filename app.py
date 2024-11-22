@@ -2,8 +2,7 @@ import streamlit as st
 import weave
 from dotenv import load_dotenv
 
-from guardrails_genie.guardrails import GuardrailManager
-from guardrails_genie.guardrails.injection import SurveyGuardrail
+from guardrails_genie.guardrails import GuardrailManager, PromptInjectionSurveyGuardrail
 from guardrails_genie.llm import OpenAIModel
 
 load_dotenv()
@@ -14,11 +13,19 @@ chat_condition = openai_model != ""
 
 guardrails = []
 
-with st.sidebar.expander("Switch on Guardrails"):
-    is_survey_guardrail_enabled = st.toggle("Survey Guardrail", value=True)
+with st.sidebar.expander("Switch on Prompt Injection Guardrails"):
+    is_survey_guardrail_enabled = st.toggle("Survey Guardrail")
 
     if is_survey_guardrail_enabled:
-        guardrails.append(SurveyGuardrail(llm_model=OpenAIModel(model_name="gpt-4o")))
+        survey_guardrail_model = st.selectbox(
+            "Survey Guardrail Model", ["", "gpt-4o-mini", "gpt-4o"]
+        )
+        if survey_guardrail_model:
+            guardrails.append(
+                PromptInjectionSurveyGuardrail(
+                    llm_model=OpenAIModel(model_name=survey_guardrail_model)
+                )
+            )
 
 guardrails_manager = GuardrailManager(guardrails=guardrails)
 

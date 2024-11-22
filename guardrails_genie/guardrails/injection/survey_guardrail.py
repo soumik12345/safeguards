@@ -15,7 +15,7 @@ class SurveyGuardrailResponse(BaseModel):
     explanation: Optional[str]
 
 
-class SurveyGuardrail(Guardrail):
+class PromptInjectionSurveyGuardrail(Guardrail):
     llm_model: OpenAIModel
 
     @weave.op()

@@ -1,4 +1,4 @@
-from .injection import SurveyGuardrail
+from .injection import PromptInjectionSurveyGuardrail
 from .manager import GuardrailManager
 
-__all__ = ["SurveyGuardrail", "GuardrailManager"]
+__all__ = ["PromptInjectionSurveyGuardrail", "GuardrailManager"]
