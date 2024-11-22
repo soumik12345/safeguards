@@ -13,8 +13,8 @@ uv pip install -e .
 source .venv/bin/activate
 ```
 
-## Run App
+## Run Chat App
 
 ```bash
-OPENAI_API_KEY="YOUR_OPENAI_API_KEY" streamlit run app.py
+OPENAI_API_KEY="YOUR_OPENAI_API_KEY" streamlit run chat_app.py
 ```
