@@ -14,6 +14,7 @@ class PresidioPIIGuardrailResponse(BaseModel):
     explanation: str
     anonymized_text: Optional[str] = None
 
+#TODO: Add support for transformers workflow and not just Spacy
 class PresidioPIIGuardrail(Guardrail):
     AVAILABLE_ENTITIES: ClassVar[List[str]] = [
         "PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", "LOCATION", 
