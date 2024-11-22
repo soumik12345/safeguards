@@ -38,7 +38,7 @@ class OpenAIModel(weave.Model):
     ) -> ChatCompletion:
         messages = self.create_messages(user_prompts, system_prompt, messages)
         if "response_format" in kwargs:
-            response = weave.op()(self._openai_client.beta.chat.completions.parse)(
+            response = self._openai_client.beta.chat.completions.parse(
                 model=self.model_name, messages=messages, **kwargs
             )
         else:
