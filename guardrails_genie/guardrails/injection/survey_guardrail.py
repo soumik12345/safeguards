@@ -74,4 +74,4 @@ Here are some strict instructions that you must follow:
     @weave.op()
     def guard(self, prompt: str, **kwargs) -> list[str]:
         response = self.predict(prompt, **kwargs)
-        return {"verdict": response.injection_prompt}
+        return {"safe": not response.injection_prompt}
