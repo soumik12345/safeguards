@@ -10,12 +10,16 @@ from guardrails_genie.llm import OpenAIModel
 load_dotenv()
 weave.init(project_name="guardrails-genie")
 
+st.title(":material/robot: Guardrails Genie")
+
 if "guardrails" not in st.session_state:
     st.session_state.guardrails = []
 if "guardrail_names" not in st.session_state:
     st.session_state.guardrail_names = []
 if "guardrails_manager" not in st.session_state:
     st.session_state.guardrails_manager = None
+if "chat_started" not in st.session_state:
+    st.session_state.chat_started = False
 
 
 def initialize_guardrails():
@@ -63,15 +67,9 @@ guardrail_names = st.sidebar.multiselect(
 )
 st.session_state.guardrail_names = guardrail_names
 
-# Use session state to track if the chat has started
-if "chat_started" not in st.session_state:
-    st.session_state.chat_started = False
-
-# Start chat when button is pressed
 if st.sidebar.button("Start Chat") and chat_condition:
     st.session_state.chat_started = True
 
-# Display chat UI if chat has started
 if st.session_state.chat_started:
     with st.sidebar.status("Initializing Guardrails..."):
         initialize_guardrails()
