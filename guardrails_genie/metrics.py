@@ -17,11 +17,6 @@ class AccuracyMetric(weave.Scorer):
         count_true = list(valid_data).count(True)
         int_data = [int(x) for x in valid_data]
 
-        sample_mean = np.mean(int_data) if int_data else 0
-        sample_variance = np.var(int_data) if int_data else 0
-        sample_error = np.sqrt(sample_variance / len(int_data)) if int_data else 0
-
-        # Calculate precision, recall, and F1 score
         true_positives = count_true
         false_positives = len(valid_data) - count_true
         false_negatives = len(score_rows) - len(valid_data)
@@ -43,7 +38,7 @@ class AccuracyMetric(weave.Scorer):
         )
 
         return {
-            "accuracy": float(sample_mean),
+            "accuracy": float(np.mean(int_data) if int_data else 0),
             "precision": precision,
             "recall": recall,
             "f1_score": f1_score,

@@ -23,7 +23,7 @@ class PromptInjectionProtectAIGuardrail(Guardrail):
             max_length=512,
             device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
         )
-    
+
     @weave.op()
     def classify(self, prompt: str):
         return self._classifier(prompt)
