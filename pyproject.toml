@@ -18,6 +18,8 @@ dependencies = [
     "watchdog>=6.0.0",
     "firerequests>=0.1.1",
     "pymupdf4llm>=0.0.17",
+    "transformers>=4.46.3",
+    "torch>=2.5.1",
 ]
 
 [tool.setuptools]

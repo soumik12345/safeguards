@@ -9,6 +9,8 @@ git clone https://github.com/soumik12345/guardrails-genie
 cd guardrails-genie
 pip install -u pip uv
 uv venv
+# If you want to install for torch CPU, uncomment the following line
+# export PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cpu
 uv pip install -e .
 source .venv/bin/activate
 ```
