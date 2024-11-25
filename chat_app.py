@@ -1,33 +1,67 @@
+import importlib
+
 import streamlit as st
 import weave
 from dotenv import load_dotenv
 
-from guardrails_genie.guardrails import GuardrailManager, PromptInjectionSurveyGuardrail
+from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
 
 load_dotenv()
 weave.init(project_name="guardrails-genie")
 
-openai_model = st.sidebar.selectbox("OpenAI LLM", ["", "gpt-4o-mini", "gpt-4o"])
+if "guardrails" not in st.session_state:
+    st.session_state.guardrails = []
+if "guardrail_names" not in st.session_state:
+    st.session_state.guardrail_names = []
+if "guardrails_manager" not in st.session_state:
+    st.session_state.guardrails_manager = None
+
+
+def initialize_guardrails():
+    st.session_state.guardrails = []
+    for guardrail_name in st.session_state.guardrail_names:
+        if guardrail_name == "PromptInjectionSurveyGuardrail":
+            survey_guardrail_model = st.sidebar.selectbox(
+                "Survey Guardrail LLM", ["", "gpt-4o-mini", "gpt-4o"]
+            )
+            if survey_guardrail_model:
+                st.session_state.guardrails.append(
+                    getattr(
+                        importlib.import_module("guardrails_genie.guardrails"),
+                        guardrail_name,
+                    )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
+                )
+        else:
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )()
+            )
+    st.session_state.guardrails_manager = GuardrailManager(
+        guardrails=st.session_state.guardrails
+    )
+
+
+openai_model = st.sidebar.selectbox(
+    "OpenAI LLM for Chat", ["", "gpt-4o-mini", "gpt-4o"]
+)
 chat_condition = openai_model != ""
 
 guardrails = []
 
-with st.sidebar.expander("Switch on Prompt Injection Guardrails"):
-    is_survey_guardrail_enabled = st.toggle("Survey Guardrail")
-
-    if is_survey_guardrail_enabled:
-        survey_guardrail_model = st.selectbox(
-            "Survey Guardrail Model", ["", "gpt-4o-mini", "gpt-4o"]
-        )
-        if survey_guardrail_model:
-            guardrails.append(
-                PromptInjectionSurveyGuardrail(
-                    llm_model=OpenAIModel(model_name=survey_guardrail_model)
-                )
-            )
-
-guardrails_manager = GuardrailManager(guardrails=guardrails)
+guardrail_names = st.sidebar.multiselect(
+    label="Select Guardrails",
+    options=[
+        cls_name
+        for cls_name, cls_obj in vars(
+            importlib.import_module("guardrails_genie.guardrails")
+        ).items()
+        if isinstance(cls_obj, type) and cls_name != "GuardrailManager"
+    ],
+)
+st.session_state.guardrail_names = guardrail_names
 
 # Use session state to track if the chat has started
 if "chat_started" not in st.session_state:
@@ -39,6 +73,9 @@ if st.sidebar.button("Start Chat") and chat_condition:
 
 # Display chat UI if chat has started
 if st.session_state.chat_started:
+    with st.sidebar.status("Initializing Guardrails..."):
+        initialize_guardrails()
+
     st.title("Guardrails Genie")
 
     # Initialize chat history
@@ -59,8 +96,8 @@ if st.session_state.chat_started:
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
 
-        guardrails_response, call = guardrails_manager.guard.call(
-            guardrails_manager, prompt=prompt
+        guardrails_response, call = st.session_state.guardrails_manager.guard.call(
+            st.session_state.guardrails_manager, prompt=prompt
         )
 
         if guardrails_response["safe"]:
