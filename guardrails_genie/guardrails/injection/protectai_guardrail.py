@@ -25,10 +25,14 @@ class PromptInjectionProtectAIGuardrail(Guardrail):
         )
 
     @weave.op()
-    def predict(self, prompt: str):
+    def classify(self, prompt: str):
         return self._classifier(prompt)
 
     @weave.op()
-    def guard(self, prompt: str):
-        response = self.predict(prompt)
+    def predict(self, prompt: str):
+        response = self.classify(prompt)
         return {"safe": response[0]["label"] != "INJECTION"}
+
+    @weave.op()
+    def guard(self, prompt: str):
+        return self.predict(prompt)
