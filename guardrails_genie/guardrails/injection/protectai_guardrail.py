@@ -23,10 +23,14 @@ class PromptInjectionProtectAIGuardrail(Guardrail):
             max_length=512,
             device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
         )
+    
+    @weave.op()
+    def classify(self, prompt: str):
+        return self._classifier(prompt)
 
     @weave.op()
     def predict(self, prompt: str):
-        response = weave.op()(self._classifier)(prompt)
+        response = self.classify(prompt)
         return {"safe": response[0]["label"] != "INJECTION"}
 
     @weave.op()
