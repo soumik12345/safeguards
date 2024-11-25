@@ -4,7 +4,9 @@ intro_page = st.Page(
     "application_pages/intro_page.py", title="Introduction", icon=":material/guardian:"
 )
 chat_page = st.Page(
-    "application_pages/chat_app.py", title="Chat", icon=":material/robot:"
+    "application_pages/chat_app.py",
+    title="Playground",
+    icon=":material/sports_esports:",
 )
 evaluation_page = st.Page(
     "application_pages/evaluation_app.py",

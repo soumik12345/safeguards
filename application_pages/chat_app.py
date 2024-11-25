@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
 
+st.title(":material/robot: Guardrails Genie Playground")
+
 load_dotenv()
 weave.init(project_name="guardrails-genie")
-
-st.title(":material/robot: Guardrails Genie")
 
 if "guardrails" not in st.session_state:
     st.session_state.guardrails = []
@@ -18,8 +18,16 @@ if "guardrail_names" not in st.session_state:
     st.session_state.guardrail_names = []
 if "guardrails_manager" not in st.session_state:
     st.session_state.guardrails_manager = None
-if "chat_started" not in st.session_state:
-    st.session_state.chat_started = False
+if "initialize_guardrails" not in st.session_state:
+    st.session_state.initialize_guardrails = False
+if "system_prompt" not in st.session_state:
+    st.session_state.system_prompt = ""
+if "user_prompt" not in st.session_state:
+    st.session_state.user_prompt = ""
+if "test_guardrails" not in st.session_state:
+    st.session_state.test_guardrails = False
+if "llm_model" not in st.session_state:
+    st.session_state.llm_model = None
 
 
 def initialize_guardrails():
@@ -67,48 +75,41 @@ guardrail_names = st.sidebar.multiselect(
 )
 st.session_state.guardrail_names = guardrail_names
 
-if st.sidebar.button("Start Chat") and chat_condition:
-    st.session_state.chat_started = True
+if st.sidebar.button("Initialize Guardrails") and chat_condition:
+    st.session_state.initialize_guardrails = True
 
-if st.session_state.chat_started:
+if st.session_state.initialize_guardrails:
     with st.sidebar.status("Initializing Guardrails..."):
         initialize_guardrails()
+        st.session_state.llm_model = OpenAIModel(model_name=openai_model)
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    user_prompt = st.text_area("User Prompt", value="")
+    st.session_state.user_prompt = user_prompt
 
-    llm_model = OpenAIModel(model_name=openai_model)
+    test_guardrails_button = st.button("Test Guardrails")
+    st.session_state.test_guardrails = test_guardrails_button
 
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    # React to user input
-    if prompt := st.chat_input("What is up?"):
-        # Display user message in chat message container
-        st.chat_message("user").markdown(prompt)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
-        guardrails_response, call = st.session_state.guardrails_manager.guard.call(
-            st.session_state.guardrails_manager, prompt=prompt
-        )
+    if st.session_state.test_guardrails:
+        with st.sidebar.status("Running Guardrails..."):
+            guardrails_response, call = st.session_state.guardrails_manager.guard.call(
+                st.session_state.guardrails_manager, prompt=st.session_state.user_prompt
+            )
 
         if guardrails_response["safe"]:
-            response, call = llm_model.predict.call(
-                llm_model, user_prompts=prompt, messages=st.session_state.messages
+            st.markdown(
+                f"\n\n---\nPrompt is safe! Explore prompt trace on [Weave]({call.ui_url})\n\n---\n"
             )
-            response = response.choices[0].message.content
 
-            # Display assistant response in chat message container
-            with st.chat_message("assistant"):
-                st.markdown(response + f"\n\n---\n[Explore in Weave]({call.ui_url})")
-            # Add assistant response to chat history
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            with st.sidebar.status("Generating response from LLM..."):
+                response, call = st.session_state.llm_model.predict.call(
+                    st.session_state.llm_model,
+                    user_prompts=st.session_state.user_prompt,
+                )
+            st.markdown(
+                response.choices[0].message.content
+                + f"\n\n---\nExplore LLM generation trace on [Weave]({call.ui_url})"
+            )
         else:
-            st.error("Guardrails detected an issue with the prompt.")
-            for alert in guardrails_response["alerts"]:
-                st.error(f"{alert['guardrail_name']}: {alert['response']}")
-            st.error(f"For details, explore in Weave at {call.ui_url}")
+            st.warning("Prompt is not safe!")
+            st.markdown(guardrails_response["summary"])
+            st.markdown(f"Explore prompt trace on [Weave]({call.ui_url})")
