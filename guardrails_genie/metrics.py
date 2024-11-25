@@ -43,14 +43,8 @@ class AccuracyMetric(weave.Scorer):
         )
 
         return {
-            "correct": {
-                "true_count": count_true,
-                "false_count": len(score_rows) - count_true,
-                "true_fraction": float(sample_mean),
-                "false_fraction": 1.0 - float(sample_mean),
-                "stderr": float(sample_error),
-                "precision": precision,
-                "recall": recall,
-                "f1_score": f1_score,
-            }
+            "accuracy": float(sample_mean),
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1_score,
         }
