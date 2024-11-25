@@ -11,7 +11,3 @@ class Guardrail(weave.Model):
     @weave.op()
     def guard(self, prompt: str, **kwargs) -> list[str]:
         pass
-
-    @weave.op()
-    def predict(self, prompt: str, **kwargs) -> list[str]:
-        return self.guard(prompt, **kwargs)
