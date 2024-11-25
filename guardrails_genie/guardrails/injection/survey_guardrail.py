@@ -15,9 +15,9 @@ class SurveyGuardrailResponse(BaseModel):
     explanation: Optional[str]
 
 
-class SurveyGuardrail(Guardrail):
+class PromptInjectionSurveyGuardrail(Guardrail):
     llm_model: OpenAIModel
-    
+
     @weave.op()
     def load_prompt_injection_survey(self) -> str:
         prompt_injection_survey_path = os.path.join(
@@ -61,7 +61,7 @@ Here are some strict instructions that you must follow:
         return user_prompt, system_prompt
 
     @weave.op()
-    def guard(self, prompt: str, **kwargs) -> list[str]:
+    def predict(self, prompt: str, **kwargs) -> list[str]:
         user_prompt, system_prompt = self.format_prompts(prompt)
         chat_completion = self.llm_model.predict(
             user_prompts=user_prompt,
@@ -70,3 +70,8 @@ Here are some strict instructions that you must follow:
             **kwargs,
         )
         return chat_completion.choices[0].message.parsed
+
+    @weave.op()
+    def guard(self, prompt: str, **kwargs) -> list[str]:
+        response = self.predict(prompt, **kwargs)
+        return {"safe": not response.injection_prompt}

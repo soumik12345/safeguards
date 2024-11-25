@@ -12,12 +12,14 @@ dependencies = [
     "ruff>=0.6.9",
     "pip>=24.2",
     "uv>=0.4.20",
-    "weave>=0.51.19",
+    "weave>=0.51.22",
     "streamlit>=1.40.1",
     "python-dotenv>=1.0.1",
     "watchdog>=6.0.0",
     "firerequests>=0.1.1",
     "pymupdf4llm>=0.0.17",
+    "transformers>=4.46.3",
+    "torch>=2.5.1",
 ]
 
 [tool.setuptools]
