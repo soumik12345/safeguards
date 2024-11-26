@@ -69,9 +69,9 @@ Here are some strict instructions that you must follow:
             response_format=SurveyGuardrailResponse,
             **kwargs,
         )
-        return chat_completion.choices[0].message.parsed
+        response = chat_completion.choices[0].message.parsed
+        return {"safe": not response.injection_prompt}
 
     @weave.op()
     def guard(self, prompt: str, **kwargs) -> list[str]:
-        response = self.predict(prompt, **kwargs)
-        return {"safe": not response.injection_prompt}
+        return self.predict(prompt, **kwargs)

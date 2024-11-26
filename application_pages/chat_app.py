@@ -74,8 +74,6 @@ if st.session_state.chat_started:
     with st.sidebar.status("Initializing Guardrails..."):
         initialize_guardrails()
 
-    st.title("Guardrails Genie")
-
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []

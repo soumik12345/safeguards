@@ -165,3 +165,4 @@ cursor_prompts/
 uv.lock
 test.py
 temp.txt
+**.csv
