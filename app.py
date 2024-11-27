@@ -13,6 +13,13 @@ evaluation_page = st.Page(
     title="Evaluation",
     icon=":material/monitoring:",
 )
-page_navigation = st.navigation([intro_page, chat_page, evaluation_page])
+train_classifier_page = st.Page(
+    "application_pages/train_classifier.py",
+    title="Train Classifier",
+    icon=":material/fitness_center:",
+)
+page_navigation = st.navigation(
+    [intro_page, chat_page, evaluation_page, train_classifier_page]
+)
 st.set_page_config(page_title="Guardrails Genie", page_icon=":material/guardian:")
 page_navigation.run()

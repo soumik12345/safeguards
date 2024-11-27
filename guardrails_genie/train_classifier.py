@@ -1,14 +1,39 @@
+
 import evaluate
 import numpy as np
-import wandb
+import streamlit as st
 from datasets import load_dataset
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
     Trainer,
+    TrainerCallback,
     TrainingArguments,
 )
+from transformers.trainer_callback import TrainerControl, TrainerState
+
+import wandb
+
+
+class StreamlitProgressbarCallback(TrainerCallback):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.progress_bar = st.progress(0, text="Training")
+
+    def on_step_begin(
+        self,
+        args: TrainingArguments,
+        state: TrainerState,
+        control: TrainerControl,
+        **kwargs,
+    ):
+        super().on_step_begin(args, state, control, **kwargs)
+        self.progress_bar.progress(
+            (state.global_step * 100 // state.max_steps) + 1,
+            text=f"Training {state.global_step} / {state.max_steps}",
+        )
 
 
 def train_binary_classifier(
@@ -20,6 +45,7 @@ def train_binary_classifier(
     batch_size: int = 16,
     num_epochs: int = 2,
     weight_decay: float = 0.01,
+    streamlit_mode: bool = False,
 ):
     wandb.init(project=project_name, entity=entity_name)
     dataset = load_dataset(dataset_repo)
@@ -69,5 +95,8 @@ def train_binary_classifier(
         processing_class=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        callbacks=[StreamlitProgressbarCallback()] if streamlit_mode else [],
     )
-    trainer.train()
+    training_output = trainer.train()
+    wandb.finish()
+    return training_output
