@@ -61,6 +61,8 @@ def train_binary_classifier(
             load_best_model_at_end=True,
             push_to_hub=True,
             report_to="wandb",
+            logging_strategy="steps",
+            logging_steps=1,
         ),
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["test"],
