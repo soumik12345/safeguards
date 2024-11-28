@@ -1,4 +1,3 @@
-
 import evaluate
 import numpy as np
 import streamlit as st
@@ -39,6 +38,7 @@ class StreamlitProgressbarCallback(TrainerCallback):
 def train_binary_classifier(
     project_name: str,
     entity_name: str,
+    run_name: str,
     dataset_repo: str = "geekyrakshit/prompt-injection-dataset",
     model_name: str = "distilbert/distilbert-base-uncased",
     learning_rate: float = 2e-5,
@@ -47,7 +47,7 @@ def train_binary_classifier(
     weight_decay: float = 0.01,
     streamlit_mode: bool = False,
 ):
-    wandb.init(project=project_name, entity=entity_name)
+    wandb.init(project=project_name, entity=entity_name, name=run_name)
     dataset = load_dataset(dataset_repo)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
