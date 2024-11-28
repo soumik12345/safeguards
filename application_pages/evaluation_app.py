@@ -64,10 +64,22 @@ def initialize_guardrail():
                         guardrail_name,
                     )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
                 )
-        else:
-            guardrails.append(
-                getattr(import_module("guardrails_genie.guardrails"), guardrail_name)()
+        elif guardrail_name == "PromptInjectionClassifierGuardrail":
+            classifier_model_name = st.sidebar.selectbox(
+                "Classifier Guardrail Model",
+                [
+                    "",
+                    "ProtectAI/deberta-v3-base-prompt-injection-v2",
+                    "wandb://geekyrakshit/guardrails-genie/model-6rwqup9b:v3",
+                ],
             )
+            if classifier_model_name:
+                st.session_state.guardrails.append(
+                    getattr(
+                        import_module("guardrails_genie.guardrails"),
+                        guardrail_name,
+                    )(model_name=classifier_model_name)
+                )
     st.session_state.guardrails = guardrails
     st.session_state.guardrail_manager = GuardrailManager(guardrails=guardrails)
 

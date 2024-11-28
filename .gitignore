@@ -168,3 +168,4 @@ temp.txt
 **.csv
 binary-classifier/
 wandb/
+artifacts/

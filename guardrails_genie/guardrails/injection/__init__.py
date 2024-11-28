@@ -1,4 +1,4 @@
-from .protectai_guardrail import PromptInjectionProtectAIGuardrail
+from .protectai_guardrail import PromptInjectionClassifierGuardrail
 from .survey_guardrail import PromptInjectionSurveyGuardrail
 
-__all__ = ["PromptInjectionSurveyGuardrail", "PromptInjectionProtectAIGuardrail"]
+__all__ = ["PromptInjectionSurveyGuardrail", "PromptInjectionClassifierGuardrail"]
