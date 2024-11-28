@@ -48,6 +48,10 @@ def train_binary_classifier(
     streamlit_mode: bool = False,
 ):
     wandb.init(project=project_name, entity=entity_name, name=run_name)
+    if streamlit_mode:
+        st.markdown(
+            f"Explore your training logs on [Weights & Biases]({wandb.run.url})"
+        )
     dataset = load_dataset(dataset_repo)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -97,6 +101,10 @@ def train_binary_classifier(
         compute_metrics=compute_metrics,
         callbacks=[StreamlitProgressbarCallback()] if streamlit_mode else [],
     )
-    training_output = trainer.train()
+    try:
+        training_output = trainer.train()
+    except Exception as e:
+        wandb.finish()
+        raise e
     wandb.finish()
     return training_output

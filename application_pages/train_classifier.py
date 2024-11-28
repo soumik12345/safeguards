@@ -3,7 +3,6 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-import wandb
 from guardrails_genie.train_classifier import train_binary_classifier
 
 
@@ -49,9 +48,6 @@ st.session_state.should_start_training = (
 
 if st.session_state.should_start_training:
     with st.expander("Training", expanded=True):
-        st.markdown(
-            f"Explore your training logs on [Weights & Biases]({wandb.run.url})"
-        )
         training_output = train_binary_classifier(
             project_name=os.getenv("WANDB_PROJECT_NAME"),
             entity_name=os.getenv("WANDB_ENTITY_NAME"),
