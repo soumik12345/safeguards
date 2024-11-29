@@ -10,7 +10,12 @@ from ..base import Guardrail
 class RegexPIIGuardrailResponse(BaseModel):
     contains_pii: bool
     detected_pii_types: Dict[str, list[str]]
-    safe_to_process: bool
+    explanation: str
+    anonymized_text: Optional[str] = None
+
+
+class RegexPIIGuardrailSimpleResponse(BaseModel):
+    contains_pii: bool
     explanation: str
     anonymized_text: Optional[str] = None
 
@@ -51,15 +56,16 @@ class RegexPIIGuardrail(Guardrail):
         )
 
     @weave.op()
-    def guard(self, prompt: str, **kwargs) -> RegexPIIGuardrailResponse:
+    def guard(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexPIIGuardrailResponse | RegexPIIGuardrailSimpleResponse:
         """
         Check if the input prompt contains any PII based on the regex patterns.
         
         Args:
             prompt: Input text to check for PII
+            return_detected_types: If True, returns detailed PII type information
             
         Returns:
-            RegexPIIGuardrailResponse containing PII detection results and recommendations
+            RegexPIIGuardrailResponse or RegexPIIGuardrailSimpleResponse containing PII detection results
         """
         result = self.regex_model.check(prompt)
         
@@ -85,11 +91,21 @@ class RegexPIIGuardrail(Guardrail):
                 for match in matches:
                     replacement = f"[{pii_type.upper()}]"
                     anonymized_text = anonymized_text.replace(match, replacement)
-                
-        return RegexPIIGuardrailResponse(
-            contains_pii=not result.passed,
-            detected_pii_types=result.matched_patterns,
-            safe_to_process=result.passed,
-            explanation="\n".join(explanation_parts),
-            anonymized_text=anonymized_text
-        )
+        
+        if return_detected_types:
+            return RegexPIIGuardrailResponse(
+                contains_pii=not result.passed,
+                detected_pii_types=result.matched_patterns,
+                explanation="\n".join(explanation_parts),
+                anonymized_text=anonymized_text
+            )
+        else:
+            return RegexPIIGuardrailSimpleResponse(
+                contains_pii=not result.passed,
+                explanation="\n".join(explanation_parts),
+                anonymized_text=anonymized_text
+            )
+
+    @weave.op()
+    def predict(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexPIIGuardrailResponse | RegexPIIGuardrailSimpleResponse:
+        return self.guard(prompt, return_detected_types=return_detected_types, **kwargs)
