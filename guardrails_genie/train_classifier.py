@@ -46,7 +46,8 @@ def train_binary_classifier(
     batch_size: int = 16,
     num_epochs: int = 2,
     weight_decay: float = 0.01,
-    save_steps: int = 1000,
+    eval_steps: int = 2000,
+    save_steps: int = 2000,
     streamlit_mode: bool = False,
 ):
     wandb.init(project=project_name, entity=entity_name, name=run_name)
@@ -88,7 +89,8 @@ def train_binary_classifier(
             per_device_eval_batch_size=batch_size,
             num_train_epochs=num_epochs,
             weight_decay=weight_decay,
-            eval_strategy="epoch",
+            eval_strategy="steps",
+            eval_steps=eval_steps,
             save_strategy="steps",
             save_steps=save_steps,
             load_best_model_at_end=True,
@@ -97,7 +99,7 @@ def train_binary_classifier(
             logging_strategy="steps",
             logging_steps=1,
         ),
-        train_dataset=tokenized_datasets["train"],
+        train_dataset=tokenized_datasets["train"].shuffle(seed=42),
         eval_dataset=tokenized_datasets["test"],
         processing_class=tokenizer,
         data_collator=data_collator,
