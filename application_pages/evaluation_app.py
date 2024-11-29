@@ -47,6 +47,8 @@ def initialize_session_state():
         st.session_state.call_id = None
     if "evaluation_call_manager" not in st.session_state:
         st.session_state.evaluation_call_manager = None
+    if "preview_evaluation_calls" not in st.session_state:
+        st.session_state.preview_evaluation_calls = False
 
 
 def initialize_guardrail():
@@ -189,33 +191,44 @@ if st.session_state.weave_project != "":
                                 f"Explore evaluation trace on [Weave]({call.ui_url})"
                             )
 
+                            preview_evaluation_calls = st.button(
+                                "Preview Evaluation Calls"
+                            )
+                            st.session_state.preview_evaluation_calls = (
+                                preview_evaluation_calls
+                            )
+
                             time.sleep(2)
-                        with st.status("Collecting evaluation calls"):
-                            st.session_state.evaluation_call_manager = (
-                                EvaluationCallManager(
-                                    entity=call.project_id.split("/")[0],
-                                    project=call.project_id.split("/")[1],
-                                    call_id=call.id,
+
+                        if st.session_state.preview_evaluation_calls:
+                            with st.status("Collecting evaluation calls"):
+                                st.session_state.evaluation_call_manager = (
+                                    EvaluationCallManager(
+                                        entity=call.project_id.split("/")[0],
+                                        project=call.project_id.split("/")[1],
+                                        call_id=call.id,
+                                    )
                                 )
-                            )
-                            for guardrail_name in st.session_state.guardrail_names:
-                                st.session_state.evaluation_call_manager.call_list.append(
-                                    {
-                                        "guardrail_name": guardrail_name,
-                                        "calls": st.session_state.evaluation_call_manager.collect_guardrail_guard_calls_from_eval(),
-                                    }
+                                for guardrail_name in st.session_state.guardrail_names:
+                                    st.session_state.evaluation_call_manager.call_list.append(
+                                        {
+                                            "guardrail_name": guardrail_name,
+                                            "calls": st.session_state.evaluation_call_manager.collect_guardrail_guard_calls_from_eval(),
+                                        }
+                                    )
+                                st.dataframe(
+                                    st.session_state.evaluation_call_manager.render_calls_to_streamlit()
                                 )
-                            st.dataframe(
-                                st.session_state.evaluation_call_manager.render_calls_to_streamlit()
-                            )
-                            if (
-                                st.session_state.evaluation_call_manager.show_warning_in_app
-                            ):
-                                st.warning(
-                                    f"Only {st.session_state.evaluation_call_manager.max_count} calls can be shown in the app."
+                                if (
+                                    st.session_state.evaluation_call_manager.show_warning_in_app
+                                ):
+                                    st.warning(
+                                        f"Only {st.session_state.evaluation_call_manager.max_count} calls can be shown in the app."
+                                    )
+                                st.markdown(
+                                    f"Explore evaluation trace on [Weave]({call.ui_url})"
                                 )
-                            st.markdown(
-                                f"Explore evaluation trace on [Weave]({call.ui_url})"
-                            )
+
+                            st.session_state.preview_evaluation_calls = False
 
                     st.session_state.evaluation_call_manager = None
