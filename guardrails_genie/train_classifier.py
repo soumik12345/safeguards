@@ -41,6 +41,7 @@ def train_binary_classifier(
     run_name: str,
     dataset_repo: str = "geekyrakshit/prompt-injection-dataset",
     model_name: str = "distilbert/distilbert-base-uncased",
+    prompt_column_name: str = "prompt",
     learning_rate: float = 2e-5,
     batch_size: int = 16,
     num_epochs: int = 2,
@@ -55,10 +56,10 @@ def train_binary_classifier(
     dataset = load_dataset(dataset_repo)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    def preprocess_function(examples):
-        return tokenizer(examples["prompt"], truncation=True)
-
-    tokenized_datasets = dataset.map(preprocess_function, batched=True)
+    tokenized_datasets = dataset.map(
+        lambda examples: tokenizer(examples[prompt_column_name], truncation=True),
+        batched=True,
+    )
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
     accuracy = evaluate.load("accuracy")
 
@@ -89,7 +90,7 @@ def train_binary_classifier(
             eval_strategy="epoch",
             save_strategy="epoch",
             load_best_model_at_end=True,
-            push_to_hub=True,
+            push_to_hub=False,
             report_to="wandb",
             logging_strategy="steps",
             logging_steps=1,
