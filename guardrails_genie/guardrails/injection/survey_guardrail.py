@@ -70,8 +70,17 @@ Here are some strict instructions that you must follow:
             **kwargs,
         )
         response = chat_completion.choices[0].message.parsed
-        return {"safe": not response.injection_prompt}
+        return response
 
     @weave.op()
     def guard(self, prompt: str, **kwargs) -> list[str]:
-        return self.predict(prompt, **kwargs)
+        response = self.predict(prompt, **kwargs)
+        summary = (
+            f"Prompt is deemed safe. {response.explanation}"
+            if not response.injection_prompt
+            else f"Prompt is deemed a {'direct attack' if response.is_direct_attack else 'indirect attack'} of type {response.attack_type}. {response.explanation}"
+        )
+        return {
+            "safe": not response.injection_prompt,
+            "summary": summary,
+        }

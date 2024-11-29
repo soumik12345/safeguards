@@ -9,7 +9,7 @@ class GuardrailManager(weave.Model):
 
     @weave.op()
     def guard(self, prompt: str, progress_bar: bool = True, **kwargs) -> dict:
-        alerts, safe = [], True
+        alerts, summaries, safe = [], "", True
         iterable = (
             track(self.guardrails, description="Running guardrails")
             if progress_bar
@@ -21,7 +21,10 @@ class GuardrailManager(weave.Model):
                 {"guardrail_name": guardrail.__class__.__name__, "response": response}
             )
             safe = safe and response["safe"]
-        return {"safe": safe, "alerts": alerts}
+            summaries += (
+                f"**{guardrail.__class__.__name__}**: {response['summary']}\n\n---\n\n"
+            )
+        return {"safe": safe, "alerts": alerts, "summary": summaries}
 
     @weave.op()
     def predict(self, prompt: str, **kwargs) -> dict:
