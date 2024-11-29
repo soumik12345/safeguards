@@ -1,8 +1,11 @@
-from .injection import PromptInjectionProtectAIGuardrail, PromptInjectionSurveyGuardrail
+from .injection import (
+    PromptInjectionClassifierGuardrail,
+    PromptInjectionSurveyGuardrail,
+)
 from .manager import GuardrailManager
 
 __all__ = [
     "PromptInjectionSurveyGuardrail",
-    "PromptInjectionProtectAIGuardrail",
+    "PromptInjectionClassifierGuardrail",
     "GuardrailManager",
 ]

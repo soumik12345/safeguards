@@ -1,7 +1,10 @@
 import asyncio
+import os
+import time
 from importlib import import_module
 
 import pandas as pd
+import rich
 import streamlit as st
 import weave
 from dotenv import load_dotenv
@@ -9,12 +12,11 @@ from dotenv import load_dotenv
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
 from guardrails_genie.metrics import AccuracyMetric
-
-load_dotenv()
-weave.init(project_name="guardrails-genie")
+from guardrails_genie.utils import EvaluationCallManager
 
 
 def initialize_session_state():
+    load_dotenv()
     if "uploaded_file" not in st.session_state:
         st.session_state.uploaded_file = None
     if "dataset_name" not in st.session_state:
@@ -35,6 +37,18 @@ def initialize_session_state():
         st.session_state.evaluation_summary = None
     if "guardrail_manager" not in st.session_state:
         st.session_state.guardrail_manager = None
+    if "evaluation_name" not in st.session_state:
+        st.session_state.evaluation_name = ""
+    if "show_result_table" not in st.session_state:
+        st.session_state.show_result_table = False
+    if "weave_client" not in st.session_state:
+        st.session_state.weave_client = weave.init(
+            project_name=os.getenv("WEAVE_PROJECT")
+        )
+    if "evaluation_call_manager" not in st.session_state:
+        st.session_state.evaluation_call_manager = None
+    if "call_id" not in st.session_state:
+        st.session_state.call_id = None
 
 
 def initialize_guardrail():
@@ -51,10 +65,22 @@ def initialize_guardrail():
                         guardrail_name,
                     )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
                 )
-        else:
-            guardrails.append(
-                getattr(import_module("guardrails_genie.guardrails"), guardrail_name)()
+        elif guardrail_name == "PromptInjectionClassifierGuardrail":
+            classifier_model_name = st.sidebar.selectbox(
+                "Classifier Guardrail Model",
+                [
+                    "",
+                    "ProtectAI/deberta-v3-base-prompt-injection-v2",
+                    "wandb://geekyrakshit/guardrails-genie/model-6rwqup9b:v3",
+                ],
             )
+            if classifier_model_name:
+                st.session_state.guardrails.append(
+                    getattr(
+                        import_module("guardrails_genie.guardrails"),
+                        guardrail_name,
+                    )(model_name=classifier_model_name)
+                )
     st.session_state.guardrails = guardrails
     st.session_state.guardrail_manager = GuardrailManager(guardrails=guardrails)
 
@@ -107,6 +133,8 @@ if st.session_state.dataset_previewed:
 
     if st.session_state.guardrail_names != []:
         initialize_guardrail()
+        evaluation_name = st.sidebar.text_input("Evaluation name", value="")
+        st.session_state.evaluation_name = evaluation_name
         if st.session_state.guardrail_manager is not None:
             if st.sidebar.button("Start Evaluation"):
                 st.session_state.start_evaluation = True
@@ -119,10 +147,55 @@ if st.session_state.dataset_previewed:
                 with st.expander("Evaluation Results", expanded=True):
                     evaluation_summary, call = asyncio.run(
                         evaluation.evaluate.call(
-                            evaluation, st.session_state.guardrail_manager
+                            evaluation,
+                            st.session_state.guardrail_manager,
+                            __weave={
+                                "display_name": "Evaluation.evaluate:"
+                                + st.session_state.evaluation_name
+                            },
                         )
                     )
-                    st.markdown(f"[Explore evaluation in Weave]({call.ui_url})")
-                    st.write(evaluation_summary)
-                st.session_state.evaluation_summary = evaluation_summary
-                st.session_state.start_evaluation = False
+                    x_axis = list(evaluation_summary["AccuracyMetric"].keys())
+                    y_axis = [
+                        evaluation_summary["AccuracyMetric"][x_axis_item]
+                        for x_axis_item in x_axis
+                    ]
+                    st.bar_chart(
+                        pd.DataFrame({"Metric": x_axis, "Score": y_axis}),
+                        x="Metric",
+                        y="Score",
+                    )
+                    st.session_state.evaluation_summary = evaluation_summary
+                    st.session_state.call_id = call.id
+                    st.session_state.start_evaluation = False
+
+                    if not st.session_state.start_evaluation:
+                        time.sleep(5)
+                        st.session_state.evaluation_call_manager = (
+                            EvaluationCallManager(
+                                entity="geekyrakshit",
+                                project="guardrails-genie",
+                                call_id=st.session_state.call_id,
+                            )
+                        )
+                        for guardrail_name in st.session_state.guardrail_names:
+                            st.session_state.evaluation_call_manager.call_list.append(
+                                {
+                                    "guardrail_name": guardrail_name,
+                                    "calls": st.session_state.evaluation_call_manager.collect_guardrail_guard_calls_from_eval(),
+                                }
+                            )
+                            rich.print(
+                                st.session_state.evaluation_call_manager.call_list
+                            )
+                        st.dataframe(
+                            st.session_state.evaluation_call_manager.render_calls_to_streamlit()
+                        )
+                        if st.session_state.evaluation_call_manager.show_warning_in_app:
+                            st.warning(
+                                f"Only {st.session_state.evaluation_call_manager.max_count} calls can be shown in the app."
+                            )
+                        st.markdown(
+                            f"Explore the entire evaluation trace table in [Weave]({call.ui_url})"
+                        )
+                    st.session_state.evaluation_call_manager = None

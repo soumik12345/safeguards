@@ -1,4 +1,5 @@
 import importlib
+import os
 
 import streamlit as st
 import weave
@@ -7,27 +8,27 @@ from dotenv import load_dotenv
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
 
-st.title(":material/robot: Guardrails Genie Playground")
 
-load_dotenv()
-weave.init(project_name="guardrails-genie")
+def initialize_session_state():
+    load_dotenv()
+    weave.init(project_name=os.getenv("WEAVE_PROJECT"))
 
-if "guardrails" not in st.session_state:
-    st.session_state.guardrails = []
-if "guardrail_names" not in st.session_state:
-    st.session_state.guardrail_names = []
-if "guardrails_manager" not in st.session_state:
-    st.session_state.guardrails_manager = None
-if "initialize_guardrails" not in st.session_state:
-    st.session_state.initialize_guardrails = False
-if "system_prompt" not in st.session_state:
-    st.session_state.system_prompt = ""
-if "user_prompt" not in st.session_state:
-    st.session_state.user_prompt = ""
-if "test_guardrails" not in st.session_state:
-    st.session_state.test_guardrails = False
-if "llm_model" not in st.session_state:
-    st.session_state.llm_model = None
+    if "guardrails" not in st.session_state:
+        st.session_state.guardrails = []
+    if "guardrail_names" not in st.session_state:
+        st.session_state.guardrail_names = []
+    if "guardrails_manager" not in st.session_state:
+        st.session_state.guardrails_manager = None
+    if "initialize_guardrails" not in st.session_state:
+        st.session_state.initialize_guardrails = False
+    if "system_prompt" not in st.session_state:
+        st.session_state.system_prompt = ""
+    if "user_prompt" not in st.session_state:
+        st.session_state.user_prompt = ""
+    if "test_guardrails" not in st.session_state:
+        st.session_state.test_guardrails = False
+    if "llm_model" not in st.session_state:
+        st.session_state.llm_model = None
 
 
 def initialize_guardrails():
@@ -44,17 +45,29 @@ def initialize_guardrails():
                         guardrail_name,
                     )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
                 )
-        else:
-            st.session_state.guardrails.append(
-                getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
-                    guardrail_name,
-                )()
+        elif guardrail_name == "PromptInjectionClassifierGuardrail":
+            classifier_model_name = st.sidebar.selectbox(
+                "Classifier Guardrail Model",
+                [
+                    "",
+                    "ProtectAI/deberta-v3-base-prompt-injection-v2",
+                    "wandb://geekyrakshit/guardrails-genie/model-6rwqup9b:v3",
+                ],
             )
+            if classifier_model_name != "":
+                st.session_state.guardrails.append(
+                    getattr(
+                        importlib.import_module("guardrails_genie.guardrails"),
+                        guardrail_name,
+                    )(model_name=classifier_model_name)
+                )
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
     )
 
+
+initialize_session_state()
+st.title(":material/robot: Guardrails Genie Playground")
 
 openai_model = st.sidebar.selectbox(
     "OpenAI LLM for Chat", ["", "gpt-4o-mini", "gpt-4o"]
@@ -97,7 +110,7 @@ if st.session_state.initialize_guardrails:
 
         if guardrails_response["safe"]:
             st.markdown(
-                f"\n\n---\nPrompt is safe! Explore prompt trace on [Weave]({call.ui_url})\n\n---\n"
+                f"\n\n---\nPrompt is safe! Explore guardrail trace on [Weave]({call.ui_url})\n\n---\n"
             )
 
             with st.sidebar.status("Generating response from LLM..."):
