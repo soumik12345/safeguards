@@ -1,5 +1,4 @@
 import importlib
-import os
 
 import streamlit as st
 import weave
@@ -11,7 +10,11 @@ from guardrails_genie.llm import OpenAIModel
 
 def initialize_session_state():
     load_dotenv()
-    weave.init(project_name=os.getenv("WEAVE_PROJECT"))
+
+    weave_project = st.sidebar.text_input(label="Weave Project", value="")
+    st.session_state.weave_project = weave_project
+    if weave_project != "":
+        st.session_state.weave_client = weave.init(project_name=weave_project)
 
     if "guardrails" not in st.session_state:
         st.session_state.guardrails = []
