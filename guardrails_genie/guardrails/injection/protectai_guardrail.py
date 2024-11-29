@@ -38,11 +38,6 @@ class PromptInjectionClassifierGuardrail(Guardrail):
         return self._classifier(prompt)
 
     @weave.op()
-    def predict(self, prompt: str):
-        response = self.classify(prompt)
-        return {"safe": response[0]["label"] != "INJECTION"}
-
-    @weave.op()
     def guard(self, prompt: str):
         response = self.classify(prompt)
         confidence_percentage = round(response[0]["score"] * 100, 2)
@@ -50,3 +45,7 @@ class PromptInjectionClassifierGuardrail(Guardrail):
             "safe": response[0]["label"] != "INJECTION",
             "summary": f"Prompt is deemed {response[0]['label']} with {confidence_percentage}% confidence.",
         }
+
+    @weave.op()
+    def predict(self, prompt: str):
+        return self.guard(prompt)

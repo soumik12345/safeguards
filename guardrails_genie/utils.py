@@ -22,16 +22,19 @@ class EvaluationCallManager:
         self.show_warning_in_app = False
         self.call_list = []
 
-    def collect_guardrail_guard_calls_from_eval(self, call):
+    def collect_guardrail_guard_calls_from_eval(self):
         guard_calls, count = [], 0
-        for eval_predict_call in call.children():
-            if "Evaluation.summarize" in eval_predict_call._op_name:
+        for eval_predict_and_score_call in self.base_call.children():
+            if "Evaluation.summarize" in eval_predict_and_score_call._op_name:
                 break
-            required_call = eval_predict_call.children()[0].children()[0].children()[0]
+            guardrail_predict_call = eval_predict_and_score_call.children()[0]
+            guard_call = guardrail_predict_call.children()[0]
+            score_call = eval_predict_and_score_call.children()[1]
             guard_calls.append(
                 {
-                    "input_prompt": str(required_call.inputs["prompt"]),
-                    "outputs": dict(required_call.output),
+                    "input_prompt": str(guard_call.inputs["prompt"]),
+                    "outputs": dict(guard_call.output),
+                    "score": dict(score_call.output),
                 }
             )
             count += 1
@@ -50,7 +53,7 @@ class EvaluationCallManager:
             dataframe[guardrail_call["guardrail_name"] + ".safe"] = [
                 call["outputs"]["safe"] for call in guardrail_call["calls"]
             ]
-            dataframe[guardrail_call["guardrail_name"] + ".summary"] = [
-                call["outputs"]["summary"] for call in guardrail_call["calls"]
+            dataframe[guardrail_call["guardrail_name"] + ".prediction_correctness"] = [
+                call["score"]["correct"] for call in guardrail_call["calls"]
             ]
         return pd.DataFrame(dataframe)

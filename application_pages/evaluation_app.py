@@ -4,6 +4,7 @@ import time
 from importlib import import_module
 
 import pandas as pd
+import rich
 import streamlit as st
 import weave
 from dotenv import load_dotenv
@@ -181,10 +182,11 @@ if st.session_state.dataset_previewed:
                             st.session_state.evaluation_call_manager.call_list.append(
                                 {
                                     "guardrail_name": guardrail_name,
-                                    "calls": st.session_state.evaluation_call_manager.collect_guardrail_guard_calls_from_eval(
-                                        call=call
-                                    ),
+                                    "calls": st.session_state.evaluation_call_manager.collect_guardrail_guard_calls_from_eval(),
                                 }
+                            )
+                            rich.print(
+                                st.session_state.evaluation_call_manager.call_list
                             )
                         st.dataframe(
                             st.session_state.evaluation_call_manager.render_calls_to_streamlit()
