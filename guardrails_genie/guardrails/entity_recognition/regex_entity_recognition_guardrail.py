@@ -7,25 +7,25 @@ from ...regex_model import RegexModel
 from ..base import Guardrail
 
 
-class RegexPIIGuardrailResponse(BaseModel):
-    contains_pii: bool
-    detected_pii_types: Dict[str, list[str]]
+class RegexEntityRecognitionResponse(BaseModel):
+    contains_entities: bool
+    detected_entities: Dict[str, list[str]]
     explanation: str
     anonymized_text: Optional[str] = None
 
 
-class RegexPIIGuardrailSimpleResponse(BaseModel):
-    contains_pii: bool
+class RegexEntityRecognitionSimpleResponse(BaseModel):
+    contains_entities: bool
     explanation: str
     anonymized_text: Optional[str] = None
 
 
-class RegexPIIGuardrail(Guardrail):
+class RegexEntityRecognitionGuardrail(Guardrail):
     regex_model: RegexModel
     patterns: Dict[str, str] = {}
     should_anonymize: bool = False
     
-    DEFAULT_PII_PATTERNS: ClassVar[Dict[str, str]] = {
+    DEFAULT_PATTERNS: ClassVar[Dict[str, str]] = {
         "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
         "phone_number": r"\b(?:\+?1[-.]?)?\(?(?:[0-9]{3})\)?[-.]?(?:[0-9]{3})[-.]?(?:[0-9]{4})\b",
         "ssn": r"\b\d{3}[-]?\d{2}[-]?\d{4}\b",
@@ -41,7 +41,7 @@ class RegexPIIGuardrail(Guardrail):
     def __init__(self, use_defaults: bool = True, should_anonymize: bool = False, **kwargs):
         patterns = {}
         if use_defaults:
-            patterns = self.DEFAULT_PII_PATTERNS.copy()
+            patterns = self.DEFAULT_PATTERNS.copy()
         if kwargs.get("patterns"):
             patterns.update(kwargs["patterns"])
         
@@ -56,30 +56,30 @@ class RegexPIIGuardrail(Guardrail):
         )
 
     @weave.op()
-    def guard(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexPIIGuardrailResponse | RegexPIIGuardrailSimpleResponse:
+    def guard(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
         """
-        Check if the input prompt contains any PII based on the regex patterns.
+        Check if the input prompt contains any entities based on the regex patterns.
         
         Args:
-            prompt: Input text to check for PII
-            return_detected_types: If True, returns detailed PII type information
+            prompt: Input text to check for entities
+            return_detected_types: If True, returns detailed entity type information
             
         Returns:
-            RegexPIIGuardrailResponse or RegexPIIGuardrailSimpleResponse containing PII detection results
+            RegexEntityRecognitionResponse or RegexEntityRecognitionSimpleResponse containing detection results
         """
         result = self.regex_model.check(prompt)
         
         # Create detailed explanation
         explanation_parts = []
         if result.matched_patterns:
-            explanation_parts.append("Found the following PII in the text:")
-            for pii_type, matches in result.matched_patterns.items():
-                explanation_parts.append(f"- {pii_type}: {len(matches)} instance(s)")
+            explanation_parts.append("Found the following entities in the text:")
+            for entity_type, matches in result.matched_patterns.items():
+                explanation_parts.append(f"- {entity_type}: {len(matches)} instance(s)")
         else:
-            explanation_parts.append("No PII detected in the text.")
+            explanation_parts.append("No entities detected in the text.")
         
         if result.failed_patterns:
-            explanation_parts.append("\nChecked but did not find these PII types:")
+            explanation_parts.append("\nChecked but did not find these entity types:")
             for pattern in result.failed_patterns:
                 explanation_parts.append(f"- {pattern}")
                 
@@ -87,25 +87,25 @@ class RegexPIIGuardrail(Guardrail):
         anonymized_text = None
         if getattr(self, 'should_anonymize', False) and result.matched_patterns:
             anonymized_text = prompt
-            for pii_type, matches in result.matched_patterns.items():
+            for entity_type, matches in result.matched_patterns.items():
                 for match in matches:
-                    replacement = f"[{pii_type.upper()}]"
+                    replacement = f"[{entity_type.upper()}]"
                     anonymized_text = anonymized_text.replace(match, replacement)
         
         if return_detected_types:
-            return RegexPIIGuardrailResponse(
-                contains_pii=not result.passed,
-                detected_pii_types=result.matched_patterns,
+            return RegexEntityRecognitionResponse(
+                contains_entities=not result.passed,
+                detected_entities=result.matched_patterns,
                 explanation="\n".join(explanation_parts),
                 anonymized_text=anonymized_text
             )
         else:
-            return RegexPIIGuardrailSimpleResponse(
-                contains_pii=not result.passed,
+            return RegexEntityRecognitionSimpleResponse(
+                contains_entities=not result.passed,
                 explanation="\n".join(explanation_parts),
                 anonymized_text=anonymized_text
             )
 
     @weave.op()
-    def predict(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexPIIGuardrailResponse | RegexPIIGuardrailSimpleResponse:
+    def predict(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
         return self.guard(prompt, return_detected_types=return_detected_types, **kwargs)

@@ -5,19 +5,19 @@ from pydantic import BaseModel
 from ..base import Guardrail
 import weave
 
-class TransformersPipelinePIIGuardrailResponse(BaseModel):
-    contains_pii: bool
-    detected_pii_types: Dict[str, List[str]]
+class TransformersEntityRecognitionResponse(BaseModel):
+    contains_entities: bool
+    detected_entities: Dict[str, List[str]]
     explanation: str
     anonymized_text: Optional[str] = None
 
-class TransformersPipelinePIIGuardrailSimpleResponse(BaseModel):
-    contains_pii: bool
+class TransformersEntityRecognitionSimpleResponse(BaseModel):
+    contains_entities: bool
     explanation: str
     anonymized_text: Optional[str] = None
 
-class TransformersPipelinePIIGuardrail(Guardrail):
-    """Generic guardrail for detecting PII using any token classification model."""
+class TransformersEntityRecognitionGuardrail(Guardrail):
+    """Generic guardrail for detecting entities using any token classification model."""
     
     _pipeline: Optional[object] = None
     selected_entities: List[str]
@@ -82,7 +82,7 @@ class TransformersPipelinePIIGuardrail(Guardrail):
 
     def _print_available_entities(self, entities: List[str]):
         """Print all available entity types that can be detected by the model."""
-        print("\nAvailable PII entity types:")
+        print("\nAvailable entity types:")
         print("=" * 25)
         for entity in entities:
             print(f"- {entity}")
@@ -92,23 +92,23 @@ class TransformersPipelinePIIGuardrail(Guardrail):
         """Print all available entity types that can be detected by the model."""
         self._print_available_entities(self.available_entities)
 
-    def _detect_pii(self, text: str) -> Dict[str, List[str]]:
-        """Detect PII entities in the text using the pipeline."""
+    def _detect_entities(self, text: str) -> Dict[str, List[str]]:
+        """Detect entities in the text using the pipeline."""
         results = self._pipeline(text)
         
         # Group findings by entity type
-        detected_pii = {}
+        detected_entities = {}
         for entity in results:
             entity_type = entity['entity_group']
             if entity_type in self.selected_entities:
-                if entity_type not in detected_pii:
-                    detected_pii[entity_type] = []
-                detected_pii[entity_type].append(entity['word'])
+                if entity_type not in detected_entities:
+                    detected_entities[entity_type] = []
+                detected_entities[entity_type].append(entity['word'])
                 
-        return detected_pii
+        return detected_entities
 
     def _anonymize_text(self, text: str, aggregate_redaction: bool = True) -> str:
-        """Anonymize detected PII in text using the pipeline."""
+        """Anonymize detected entities in text using the pipeline."""
         results = self._pipeline(text)
         
         # Sort entities by start position in reverse order to avoid offset issues
@@ -131,49 +131,49 @@ class TransformersPipelinePIIGuardrail(Guardrail):
         return ' '.join(result.split())
 
     @weave.op()
-    def guard(self, prompt: str, return_detected_types: bool = True, aggregate_redaction: bool = True) -> TransformersPipelinePIIGuardrailResponse | TransformersPipelinePIIGuardrailSimpleResponse:
-        """Check if the input prompt contains any PII using Piiranha.
+    def guard(self, prompt: str, return_detected_types: bool = True, aggregate_redaction: bool = True) -> TransformersEntityRecognitionResponse | TransformersEntityRecognitionSimpleResponse:
+        """Check if the input prompt contains any entities using the transformer pipeline.
         
         Args:
             prompt: The text to analyze
-            return_detected_types: If True, returns detailed PII type information
+            return_detected_types: If True, returns detailed entity type information
             aggregate_redaction: If True, uses generic [redacted] instead of entity type
         """
-        # Detect PII
-        detected_pii = self._detect_pii(prompt)
+        # Detect entities
+        detected_entities = self._detect_entities(prompt)
         
         # Create explanation
         explanation_parts = []
-        if detected_pii:
-            explanation_parts.append("Found the following PII in the text:")
-            for pii_type, instances in detected_pii.items():
-                explanation_parts.append(f"- {pii_type}: {len(instances)} instance(s)")
+        if detected_entities:
+            explanation_parts.append("Found the following entities in the text:")
+            for entity_type, instances in detected_entities.items():
+                explanation_parts.append(f"- {entity_type}: {len(instances)} instance(s)")
         else:
-            explanation_parts.append("No PII detected in the text.")
+            explanation_parts.append("No entities detected in the text.")
         
-        explanation_parts.append("\nChecked for these PII types:")
+        explanation_parts.append("\nChecked for these entities:")
         for entity in self.selected_entities:
             explanation_parts.append(f"- {entity}")
         
         # Anonymize if requested
         anonymized_text = None
-        if self.should_anonymize and detected_pii:
+        if self.should_anonymize and detected_entities:
             anonymized_text = self._anonymize_text(prompt, aggregate_redaction)
         
         if return_detected_types:
-            return TransformersPipelinePIIGuardrailResponse(
-                contains_pii=bool(detected_pii),
-                detected_pii_types=detected_pii,
+            return TransformersEntityRecognitionResponse(
+                contains_entities=bool(detected_entities),
+                detected_entities=detected_entities,
                 explanation="\n".join(explanation_parts),
                 anonymized_text=anonymized_text
             )
         else:
-            return TransformersPipelinePIIGuardrailSimpleResponse(
-                contains_pii=bool(detected_pii),
+            return TransformersEntityRecognitionSimpleResponse(
+                contains_entities=bool(detected_entities),
                 explanation="\n".join(explanation_parts),
                 anonymized_text=anonymized_text
             )
 
     @weave.op()
-    def predict(self, prompt: str, return_detected_types: bool = True, aggregate_redaction: bool = True, **kwargs) -> TransformersPipelinePIIGuardrailResponse | TransformersPipelinePIIGuardrailSimpleResponse:
+    def predict(self, prompt: str, return_detected_types: bool = True, aggregate_redaction: bool = True, **kwargs) -> TransformersEntityRecognitionResponse | TransformersEntityRecognitionSimpleResponse:
         return self.guard(prompt, return_detected_types=return_detected_types, aggregate_redaction=aggregate_redaction, **kwargs)

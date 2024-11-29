@@ -7,19 +7,19 @@ from presidio_anonymizer import AnonymizerEngine
 
 from ..base import Guardrail
 
-class PresidioPIIGuardrailResponse(BaseModel):
-    contains_pii: bool
-    detected_pii_types: Dict[str, List[str]]
+class PresidioEntityRecognitionResponse(BaseModel):
+    contains_entities: bool
+    detected_entities: Dict[str, List[str]]
     explanation: str
     anonymized_text: Optional[str] = None
 
-class PresidioPIIGuardrailSimpleResponse(BaseModel):
-    contains_pii: bool
+class PresidioEntityRecognitionSimpleResponse(BaseModel):
+    contains_entities: bool
     explanation: str
     anonymized_text: Optional[str] = None
 
 #TODO: Add support for transformers workflow and not just Spacy
-class PresidioPIIGuardrail(Guardrail):
+class PresidioEntityRecognitionGuardrail(Guardrail):
     @staticmethod
     def get_available_entities() -> List[str]:
         registry = RecognizerRegistry()
@@ -103,15 +103,15 @@ class PresidioPIIGuardrail(Guardrail):
         )
 
     @weave.op()
-    def guard(self, prompt: str, return_detected_types: bool = True, **kwargs) -> PresidioPIIGuardrailResponse | PresidioPIIGuardrailSimpleResponse:
+    def guard(self, prompt: str, return_detected_types: bool = True, **kwargs) -> PresidioEntityRecognitionResponse | PresidioEntityRecognitionSimpleResponse:
         """
-        Check if the input prompt contains any PII using Presidio.
+        Check if the input prompt contains any entities using Presidio.
         
         Args:
             prompt: The text to analyze
-            return_detected_types: If True, returns detailed PII type information
+            return_detected_types: If True, returns detailed entity type information
         """
-        # Analyze text for PII
+        # Analyze text for entities
         analyzer_results = self.analyzer.analyze(
             text=prompt,
             entities=self.selected_entities,
@@ -119,31 +119,31 @@ class PresidioPIIGuardrail(Guardrail):
         )
         
         # Group results by entity type
-        detected_pii = {}
+        detected_entities = {}
         for result in analyzer_results:
             entity_type = result.entity_type
             text_slice = prompt[result.start:result.end]
-            if entity_type not in detected_pii:
-                detected_pii[entity_type] = []
-            detected_pii[entity_type].append(text_slice)
+            if entity_type not in detected_entities:
+                detected_entities[entity_type] = []
+            detected_entities[entity_type].append(text_slice)
         
         # Create explanation
         explanation_parts = []
-        if detected_pii:
-            explanation_parts.append("Found the following PII in the text:")
-            for pii_type, instances in detected_pii.items():
-                explanation_parts.append(f"- {pii_type}: {len(instances)} instance(s)")
+        if detected_entities:
+            explanation_parts.append("Found the following entities in the text:")
+            for entity_type, instances in detected_entities.items():
+                explanation_parts.append(f"- {entity_type}: {len(instances)} instance(s)")
         else:
-            explanation_parts.append("No PII detected in the text.")
+            explanation_parts.append("No entities detected in the text.")
             
         # Add information about what was checked
-        explanation_parts.append("\nChecked for these PII types:")
+        explanation_parts.append("\nChecked for these entity types:")
         for entity in self.selected_entities:
             explanation_parts.append(f"- {entity}")
         
         # Anonymize if requested
         anonymized_text = None
-        if self.should_anonymize and detected_pii:
+        if self.should_anonymize and detected_entities:
             anonymized_result = self.anonymizer.anonymize(
                 text=prompt,
                 analyzer_results=analyzer_results
@@ -151,19 +151,19 @@ class PresidioPIIGuardrail(Guardrail):
             anonymized_text = anonymized_result.text
             
         if return_detected_types:
-            return PresidioPIIGuardrailResponse(
-                contains_pii=bool(detected_pii),
-                detected_pii_types=detected_pii,
+            return PresidioEntityRecognitionResponse(
+                contains_entities=bool(detected_entities),
+                detected_entities=detected_entities,
                 explanation="\n".join(explanation_parts),
                 anonymized_text=anonymized_text
             )
         else:
-            return PresidioPIIGuardrailSimpleResponse(
-                contains_pii=bool(detected_pii),
+            return PresidioEntityRecognitionSimpleResponse(
+                contains_entities=bool(detected_entities),
                 explanation="\n".join(explanation_parts),
                 anonymized_text=anonymized_text
             )
     
     @weave.op()
-    def predict(self, prompt: str, return_detected_types: bool = True, **kwargs) -> PresidioPIIGuardrailResponse | PresidioPIIGuardrailSimpleResponse:
+    def predict(self, prompt: str, return_detected_types: bool = True, **kwargs) -> PresidioEntityRecognitionResponse | PresidioEntityRecognitionSimpleResponse:
         return self.guard(prompt, return_detected_types=return_detected_types, **kwargs)
