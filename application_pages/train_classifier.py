@@ -48,14 +48,17 @@ st.session_state.should_start_training = (
 
 if st.session_state.should_start_training:
     with st.expander("Training", expanded=True):
-        training_output = train_binary_classifier(
-            project_name=os.getenv("WANDB_PROJECT_NAME"),
-            entity_name=os.getenv("WANDB_ENTITY_NAME"),
-            run_name=f"{st.session_state.base_model_name}-finetuned",
-            dataset_repo=st.session_state.dataset_name,
-            model_name=st.session_state.base_model_name,
-            batch_size=st.session_state.batch_size,
-            streamlit_mode=True,
-        )
-        st.session_state.training_output = training_output
-        st.write(training_output)
+        try:
+            training_output = train_binary_classifier(
+                project_name=os.getenv("WANDB_PROJECT_NAME"),
+                entity_name=os.getenv("WANDB_ENTITY_NAME"),
+                run_name=f"{st.session_state.base_model_name}-finetuned",
+                dataset_repo=st.session_state.dataset_name,
+                model_name=st.session_state.base_model_name,
+                batch_size=st.session_state.batch_size,
+                streamlit_mode=True,
+            )
+            st.session_state.training_output = training_output
+            st.write(training_output)
+        except Exception as e:
+            st.error(e)
