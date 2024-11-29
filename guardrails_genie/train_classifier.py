@@ -42,10 +42,11 @@ def train_binary_classifier(
     dataset_repo: str = "geekyrakshit/prompt-injection-dataset",
     model_name: str = "distilbert/distilbert-base-uncased",
     prompt_column_name: str = "prompt",
-    learning_rate: float = 2e-5,
+    learning_rate: float = 1e-5,
     batch_size: int = 16,
     num_epochs: int = 2,
     weight_decay: float = 0.01,
+    save_steps: int = 1000,
     streamlit_mode: bool = False,
 ):
     wandb.init(project=project_name, entity=entity_name, name=run_name)
@@ -88,7 +89,8 @@ def train_binary_classifier(
             num_train_epochs=num_epochs,
             weight_decay=weight_decay,
             eval_strategy="epoch",
-            save_strategy="epoch",
+            save_strategy="steps",
+            save_steps=save_steps,
             load_best_model_at_end=True,
             push_to_hub=False,
             report_to="wandb",
