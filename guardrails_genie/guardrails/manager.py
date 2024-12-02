@@ -1,5 +1,6 @@
 import weave
 from rich.progress import track
+from pydantic import BaseModel
 
 from .base import Guardrail
 
@@ -20,10 +21,12 @@ class GuardrailManager(weave.Model):
             alerts.append(
                 {"guardrail_name": guardrail.__class__.__name__, "response": response}
             )
-            safe = safe and response["safe"]
-            summaries += (
-                f"**{guardrail.__class__.__name__}**: {response['summary']}\n\n---\n\n"
-            )
+            if isinstance(response, BaseModel):
+                safe = safe and response.safe
+                summaries += f"**{guardrail.__class__.__name__}**: {response.explanation}\n\n---\n\n"
+            else:
+                safe = safe and response["safe"]
+                summaries += f"**{guardrail.__class__.__name__}**: {response['summary']}\n\n---\n\n"
         return {"safe": safe, "alerts": alerts, "summary": summaries}
 
     @weave.op()

@@ -8,7 +8,7 @@ def test_pii_detection():
     
     # Create the guardrail with default entities and anonymization enabled
     pii_guardrail = TransformersEntityRecognitionGuardrail(
-        selected_entities=["GIVENNAME", "SURNAME", "EMAIL", "PHONE_NUMBER", "SOCIALNUM"],
+        selected_entities=["GIVENNAME", "SURNAME", "EMAIL", "TELEPHONENUM", "SOCIALNUM"],
         should_anonymize=True,
         show_available_entities=True
     )

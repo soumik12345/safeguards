@@ -13,11 +13,19 @@ class RegexEntityRecognitionResponse(BaseModel):
     explanation: str
     anonymized_text: Optional[str] = None
 
+    @property
+    def safe(self) -> bool:
+        return not self.contains_entities
+
 
 class RegexEntityRecognitionSimpleResponse(BaseModel):
     contains_entities: bool
     explanation: str
     anonymized_text: Optional[str] = None
+
+    @property
+    def safe(self) -> bool:
+        return not self.contains_entities
 
 
 class RegexEntityRecognitionGuardrail(Guardrail):

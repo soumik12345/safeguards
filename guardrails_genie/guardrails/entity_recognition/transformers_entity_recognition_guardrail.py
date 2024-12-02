@@ -11,10 +11,18 @@ class TransformersEntityRecognitionResponse(BaseModel):
     explanation: str
     anonymized_text: Optional[str] = None
 
+    @property
+    def safe(self) -> bool:
+        return not self.contains_entities
+
 class TransformersEntityRecognitionSimpleResponse(BaseModel):
     contains_entities: bool
     explanation: str
     anonymized_text: Optional[str] = None
+
+    @property
+    def safe(self) -> bool:
+        return not self.contains_entities
 
 class TransformersEntityRecognitionGuardrail(Guardrail):
     """Generic guardrail for detecting entities using any token classification model."""
@@ -126,9 +134,12 @@ class TransformersEntityRecognitionGuardrail(Guardrail):
                 # Replace the entity with the redaction marker
                 chars[start:end] = replacement
         
-        # Join and clean up multiple spaces
+        # Join characters and clean up only consecutive spaces (preserving newlines)
         result = ''.join(chars)
-        return ' '.join(result.split())
+        # Replace multiple spaces with single space, but preserve newlines
+        lines = result.split('\n')
+        cleaned_lines = [' '.join(line.split()) for line in lines]
+        return '\n'.join(cleaned_lines)
 
     @weave.op()
     def guard(self, prompt: str, return_detected_types: bool = True, aggregate_redaction: bool = True) -> TransformersEntityRecognitionResponse | TransformersEntityRecognitionSimpleResponse:

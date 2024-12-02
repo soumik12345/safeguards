@@ -13,10 +13,18 @@ class PresidioEntityRecognitionResponse(BaseModel):
     explanation: str
     anonymized_text: Optional[str] = None
 
+    @property
+    def safe(self) -> bool:
+        return not self.contains_entities
+
 class PresidioEntityRecognitionSimpleResponse(BaseModel):
     contains_entities: bool
     explanation: str
     anonymized_text: Optional[str] = None
+
+    @property
+    def safe(self) -> bool:
+        return not self.contains_entities
 
 #TODO: Add support for transformers workflow and not just Spacy
 class PresidioEntityRecognitionGuardrail(Guardrail):
@@ -40,23 +48,37 @@ class PresidioEntityRecognitionGuardrail(Guardrail):
         language: str = "en",
         deny_lists: Optional[Dict[str, List[str]]] = None,
         regex_patterns: Optional[Dict[str, List[Dict[str, str]]]] = None,
-        custom_recognizers: Optional[List[Any]] = None
+        custom_recognizers: Optional[List[Any]] = None,
+        show_available_entities: bool = False
     ):
+        # If show_available_entities is True, print available entities
+        if show_available_entities:
+            available_entities = self.get_available_entities()
+            print("\nAvailable entities:")
+            print("=" * 25)
+            for entity in available_entities:
+                print(f"- {entity}")
+            print("=" * 25 + "\n")
+
         # Initialize default values
         if selected_entities is None:
             selected_entities = [
-                "PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", 
-                "LOCATION", "CREDIT_CARD", "US_SSN"
+                "CREDIT_CARD", "US_SSN", "EMAIL_ADDRESS", "PHONE_NUMBER",
+                "IP_ADDRESS", "URL", "DATE_TIME"
             ]
         
         # Get available entities dynamically
         available_entities = self.get_available_entities()
         
-        # Validate selected entities
-        invalid_entities = set(selected_entities) - set(available_entities)
+        # Filter out invalid entities and warn user
+        invalid_entities = [e for e in selected_entities if e not in available_entities]
+        valid_entities = [e for e in selected_entities if e in available_entities]
+        
         if invalid_entities:
-            raise ValueError(f"Invalid entities: {invalid_entities}")
-            
+            print(f"\nWarning: The following entities are not available and will be ignored: {invalid_entities}")
+            print(f"Continuing with valid entities: {valid_entities}")
+            selected_entities = valid_entities
+        
         # Initialize analyzer with default recognizers
         analyzer = AnalyzerEngine()
         
