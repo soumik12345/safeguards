@@ -6,6 +6,7 @@ from .entity_recognition import (
     PresidioEntityRecognitionGuardrail,
     RegexEntityRecognitionGuardrail,
     TransformersEntityRecognitionGuardrail,
+    RestrictedTermsJudge,
 )
 from .manager import GuardrailManager
 
@@ -15,5 +16,6 @@ __all__ = [
     "PresidioEntityRecognitionGuardrail",
     "RegexEntityRecognitionGuardrail",
     "TransformersEntityRecognitionGuardrail",
+    "RestrictedTermsJudge",
     "GuardrailManager",
 ]

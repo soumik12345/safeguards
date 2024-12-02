@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from ...regex_model import RegexModel
 from ..base import Guardrail
+import re
 
 
 class RegexEntityRecognitionResponse(BaseModel):
@@ -63,19 +64,37 @@ class RegexEntityRecognitionGuardrail(Guardrail):
             should_anonymize=should_anonymize
         )
 
+    def text_to_pattern(self, text: str) -> str:
+        """
+        Convert input text into a regex pattern that matches the exact text.
+        """
+        # Escape special regex characters in the text
+        escaped_text = re.escape(text)
+        # Create a pattern that matches the exact text, case-insensitive
+        return rf"\b{escaped_text}\b"
+
     @weave.op()
-    def guard(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
+    def guard(self, prompt: str, custom_terms: Optional[list[str]] = None, return_detected_types: bool = True, aggregate_redaction: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
         """
         Check if the input prompt contains any entities based on the regex patterns.
         
         Args:
             prompt: Input text to check for entities
+            custom_terms: List of custom terms to be converted into regex patterns. If provided, 
+                        only these terms will be checked, ignoring default patterns.
             return_detected_types: If True, returns detailed entity type information
             
         Returns:
             RegexEntityRecognitionResponse or RegexEntityRecognitionSimpleResponse containing detection results
         """
-        result = self.regex_model.check(prompt)
+        if custom_terms:
+            # Create a temporary RegexModel with only the custom patterns
+            temp_patterns = {term: self.text_to_pattern(term) for term in custom_terms}
+            temp_model = RegexModel(patterns=temp_patterns)
+            result = temp_model.check(prompt)
+        else:
+            # Use the original regex_model if no custom terms provided
+            result = self.regex_model.check(prompt)
         
         # Create detailed explanation
         explanation_parts = []
@@ -91,13 +110,13 @@ class RegexEntityRecognitionGuardrail(Guardrail):
             for pattern in result.failed_patterns:
                 explanation_parts.append(f"- {pattern}")
                 
-        # Add anonymization logic
+        # Updated anonymization logic
         anonymized_text = None
         if getattr(self, 'should_anonymize', False) and result.matched_patterns:
             anonymized_text = prompt
             for entity_type, matches in result.matched_patterns.items():
                 for match in matches:
-                    replacement = f"[{entity_type.upper()}]"
+                    replacement = "[redacted]" if aggregate_redaction else f"[{entity_type.upper()}]"
                     anonymized_text = anonymized_text.replace(match, replacement)
         
         if return_detected_types:
@@ -115,5 +134,5 @@ class RegexEntityRecognitionGuardrail(Guardrail):
             )
 
     @weave.op()
-    def predict(self, prompt: str, return_detected_types: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
-        return self.guard(prompt, return_detected_types=return_detected_types, **kwargs)
+    def predict(self, prompt: str, return_detected_types: bool = True, aggregate_redaction: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
+        return self.guard(prompt, return_detected_types=return_detected_types, aggregate_redaction=aggregate_redaction, **kwargs)
