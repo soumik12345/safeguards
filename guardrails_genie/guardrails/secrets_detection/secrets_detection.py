@@ -11,7 +11,13 @@ from guardrails_genie.guardrails.base import Guardrail
 from guardrails_genie.regex_model import RegexModel
 
 
-def load_secrets_patterns():
+def load_secrets_patterns() -> dict[str, list[str]]:
+    """
+    Load secret patterns from a JSONL file and return them as a dictionary.
+
+    Returns:
+        dict: A dictionary where keys are pattern names and values are lists of regex patterns.
+    """
     default_patterns = {}
     patterns = (
         pathlib.Path(__file__).parent.absolute() / "secrets_patterns.jsonl"
@@ -23,10 +29,15 @@ def load_secrets_patterns():
     return default_patterns
 
 
+# Load default secret patterns from the JSONL file
 DEFAULT_SECRETS_PATTERNS = load_secrets_patterns()
 
 
 class REDACTION(str, Enum):
+    """
+    Enum for different types of redaction methods.
+    """
+
     REDACT_PARTIAL = "REDACT_PARTIAL"
     REDACT_ALL = "REDACT_ALL"
     REDACT_HASH = "REDACT_HASH"
@@ -34,6 +45,17 @@ class REDACTION(str, Enum):
 
 
 def redact(text: str, matches: list[str], redaction_type: REDACTION) -> str:
+    """
+    Redact the given matches in the text based on the redaction type.
+
+    Args:
+        text (str): The input text to redact.
+        matches (list[str]): List of strings to be redacted.
+        redaction_type (REDACTION): The type of redaction to apply.
+
+    Returns:
+        str: The redacted text.
+    """
     for match in matches:
         if redaction_type == REDACTION.REDACT_PARTIAL:
             replacement = "[REDACTED:]" + match[:2] + ".." + match[-2:] + "[:REDACTED]"
@@ -50,20 +72,53 @@ def redact(text: str, matches: list[str], redaction_type: REDACTION) -> str:
 
 
 class SecretsDetectionSimpleResponse(BaseModel):
+    """
+    A simple response model for secrets detection.
+
+    Attributes:
+        contains_secrets (bool): Indicates if secrets were detected.
+        explanation (str): Explanation of the detection result.
+        redacted_text (Optional[str]): The redacted text if secrets were found.
+    """
+
     contains_secrets: bool
     explanation: str
     redacted_text: Optional[str] = None
 
     @property
     def safe(self) -> bool:
-        return not self.contains_entities
+        """
+        Property to check if the text is safe (no secrets detected).
+
+        Returns:
+            bool: True if no secrets were detected, False otherwise.
+        """
+        return not self.contains_secrets
 
 
 class SecretsDetectionResponse(SecretsDetectionSimpleResponse):
+    """
+    A detailed response model for secrets detection.
+
+    Attributes:
+        detected_secrets (dict[str, list[str]]): Dictionary of detected secrets.
+    """
+
     detected_secrets: dict[str, list[str]]
 
 
 class SecretsDetectionGuardrail(Guardrail):
+    """
+    A guardrail for detecting secrets in text using regex patterns.
+    reference: SecretBench: A Dataset of Software Secrets
+    https://arxiv.org/abs/2303.06729
+
+    Attributes:
+        regex_model (RegexModel): The regex model used for detection.
+        patterns (Union[dict[str, str], dict[str, list[str]]]): The patterns used for detection.
+        redaction (REDACTION): The type of redaction to apply.
+    """
+
     regex_model: RegexModel
     patterns: Union[dict[str, str], dict[str, list[str]]] = {}
     redaction: REDACTION
@@ -74,16 +129,22 @@ class SecretsDetectionGuardrail(Guardrail):
         redaction: REDACTION = REDACTION.REDACT_ALL,
         **kwargs,
     ):
+        """
+        Initialize the SecretsDetectionGuardrail.
+
+        Args:
+            use_defaults (bool): Whether to use default patterns.
+            redaction (REDACTION): The type of redaction to apply.
+            **kwargs: Additional keyword arguments.
+        """
         patterns = {}
         if use_defaults:
             patterns = DEFAULT_SECRETS_PATTERNS.copy()
         if kwargs.get("patterns"):
             patterns.update(kwargs["patterns"])
 
-        # Create the RegexModel instance
         regex_model = RegexModel(patterns=patterns)
 
-        # Initialize the base class with both the regex_model and patterns
         super().__init__(
             regex_model=regex_model,
             patterns=patterns,
@@ -94,22 +155,21 @@ class SecretsDetectionGuardrail(Guardrail):
     def guard(
         self,
         prompt: str,
-        return_detected_types: bool = True,
+        return_detected_secrets: bool = True,
         **kwargs,
     ) -> SecretsDetectionResponse | SecretsDetectionResponse:
         """
-        Check if the input prompt contains any entities based on the regex patterns.
+        Check if the input prompt contains any secrets based on the regex patterns.
 
         Args:
-            prompt: Input text to check for entities
-            return_detected_types: If True, returns detailed entity type information
+            prompt (str): Input text to check for secrets.
+            return_detected_secrets (bool): If True, returns detailed secrets type information.
 
         Returns:
-            SecretsDetectionResponse or SecretsDetectionResponse containing detection results
+            SecretsDetectionResponse or SecretsDetectionResponse: Detection results.
         """
         result = self.regex_model.check(prompt)
 
-        # Create detailed explanation
         explanation_parts = []
         if result.matched_patterns:
             explanation_parts.append("Found the following secrets in the text:")
@@ -123,7 +183,7 @@ class SecretsDetectionGuardrail(Guardrail):
             for secret_type, matches in result.matched_patterns.items():
                 redacted_text = redact(redacted_text, matches, self.redaction)
 
-        if return_detected_types:
+        if return_detected_secrets:
             return SecretsDetectionResponse(
                 contains_secrets=not result.passed,
                 detected_secrets=result.matched_patterns,
@@ -132,52 +192,7 @@ class SecretsDetectionGuardrail(Guardrail):
             )
         else:
             return SecretsDetectionSimpleResponse(
-                contains_entities=not result.passed,
+                contains_secrets=not result.passed,
                 explanation="\n".join(explanation_parts),
                 redacted_text=redacted_text,
             )
-
-
-def main():
-    weave.init(project_name="parambharat/guardrails-genie")
-
-    guardrail = SecretsDetectionGuardrail(redaction=REDACTION.REDACT_ALL)
-    dataset = [
-        {
-            "input": 'I need to pass a key\naws_secret_access_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"',
-        },
-        {
-            "input": "My github token is: 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",
-        },
-        {
-            "input": "My JWT token is: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-        },
-    ]
-
-    for item in dataset:
-        # Check text for entities
-        result = guardrail.guard(prompt=item["input"])
-
-        # Access results
-        print(f"Contains entities: {result.contains_secrets}")
-        print(f"Detected entities: {result.detected_secrets}")
-        print(f"Explanation: {result.explanation}")
-        print(f"Anonymized text: {result.redacted_text}")
-    # import regex as re
-    #
-    # sample_input = "My JWT token is: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-    # jwt_pattern = DEFAULT_SECRETS_PATTERNS["JwtToken"][0]
-    # print(jwt_pattern)
-    # pattern = re.compile(jwt_pattern)
-    # print(pattern)
-    # print(pattern.findall(sample_input))
-
-    # import pandas as pd
-    #
-    # df = pd.read_json("secrets_patterns_bak.jsonl", lines=True)
-    # df.loc[:, "patterns"] = df["patterns"].map(lambda x: [i[2:-1] for i in x])
-    # df.to_json("secrets_patterns.jsonl", orient="records", lines=True)
-
-
-if __name__ == "__main__":
-    main()

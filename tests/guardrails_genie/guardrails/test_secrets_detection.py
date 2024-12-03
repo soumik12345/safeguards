@@ -93,7 +93,7 @@ def test_secrets_detection_guardrail_detect_types(mock_secrets_guard):
     guardrail = SecretsDetectionGuardrail(redaction=REDACTION.REDACT_ALL)
     prompt = "My secret key is ABCDEFGHIJKL"
 
-    result = guardrail.guard(prompt=prompt, return_detected_types=True)
+    result = guardrail.guard(prompt=prompt, return_detected_secrets=True)
 
     assert result.contains_secrets is True
     assert result.explanation == "The output contains secrets."
@@ -110,7 +110,7 @@ def test_secrets_detection_guardrail_simple_response(mock_secrets_guard):
     guardrail = SecretsDetectionGuardrail(redaction=REDACTION.REDACT_ALL)
     prompt = "My secret key is ABCDEFGHIJKL"
 
-    result = guardrail.guard(prompt=prompt, return_detected_types=False)
+    result = guardrail.guard(prompt=prompt, return_detected_secrets=False)
 
     assert result.contains_secrets is True
     assert result.explanation == "The output contains secrets."
@@ -126,7 +126,7 @@ def test_secrets_detection_guardrail_no_secrets(mock_secrets_guard):
     guardrail = SecretsDetectionGuardrail(redaction=REDACTION.REDACT_ALL)
     prompt = "This is a safe text with no secrets."
 
-    result = guardrail.guard(prompt=prompt, return_detected_types=True)
+    result = guardrail.guard(prompt=prompt, return_detected_secrets=True)
 
     assert result.contains_secrets is False
     assert result.explanation == "No secrets detected in the text."
@@ -143,7 +143,7 @@ def pattern_strategy(pattern):
 @given(pattern_strategy(DEFAULT_SECRETS_PATTERNS["JwtToken"][0]))
 def test_specific_pattern_guardrail(text):
     guardrail = SecretsDetectionGuardrail(redaction=REDACTION.REDACT_ALL)
-    result = guardrail.guard(prompt=text, return_detected_types=True)
+    result = guardrail.guard(prompt=text, return_detected_secrets=True)
 
     assert result.contains_secrets is True
     assert "JwtToken" in result.detected_secrets
