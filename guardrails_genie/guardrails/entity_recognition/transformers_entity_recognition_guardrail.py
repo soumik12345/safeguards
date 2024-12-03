@@ -29,7 +29,40 @@ class TransformersEntityRecognitionSimpleResponse(BaseModel):
 
 
 class TransformersEntityRecognitionGuardrail(Guardrail):
-    """Generic guardrail for detecting entities using any token classification model."""
+    """Generic guardrail for detecting entities using any token classification model.
+
+    This class leverages a transformer-based token classification model to detect and
+    optionally anonymize entities in a given text. It uses the HuggingFace `transformers`
+    library to load a pre-trained model and perform entity recognition.
+
+    !!! example "Using TransformersEntityRecognitionGuardrail"
+        ```python
+        from guardrails_genie.guardrails.entity_recognition import TransformersEntityRecognitionGuardrail
+
+        # Initialize with default model
+        guardrail = TransformersEntityRecognitionGuardrail(should_anonymize=True)
+
+        # Or with specific model and entities
+        guardrail = TransformersEntityRecognitionGuardrail(
+            model_name="iiiorg/piiranha-v1-detect-personal-information",
+            selected_entities=["GIVENNAME", "SURNAME", "EMAIL"],
+            should_anonymize=True
+        )
+        ```
+
+    Attributes:
+        _pipeline (Optional[object]): The transformer pipeline for token classification.
+        selected_entities (List[str]): List of entities to detect.
+        should_anonymize (bool): Flag indicating whether detected entities should be anonymized.
+        available_entities (List[str]): List of all available entities that the model can detect.
+
+    Args:
+        model_name (str): The name of the pre-trained model to use for entity recognition.
+        selected_entities (Optional[List[str]]): A list of specific entities to detect.
+            If None, all available entities will be used.
+        should_anonymize (bool): If True, detected entities will be anonymized.
+        show_available_entities (bool): If True, available entity types will be printed.
+    """
 
     _pipeline: Optional[object] = None
     selected_entities: List[str]
@@ -161,12 +194,26 @@ class TransformersEntityRecognitionGuardrail(Guardrail):
         TransformersEntityRecognitionResponse
         | TransformersEntityRecognitionSimpleResponse
     ):
-        """Check if the input prompt contains any entities using the transformer pipeline.
+        """Analyze the input prompt for entity recognition and optionally anonymize detected entities.
+
+        This function utilizes a transformer-based pipeline to detect entities within the provided
+        text prompt. It returns a response indicating whether any entities were found, along with
+        detailed information about the detected entities if requested. The function can also anonymize
+        the detected entities in the text based on the specified parameters.
 
         Args:
-            prompt: The text to analyze
-            return_detected_types: If True, returns detailed entity type information
-            aggregate_redaction: If True, uses generic [redacted] instead of entity type
+            prompt (str): The text to be analyzed for entity detection.
+            return_detected_types (bool): If True, the response includes detailed information about
+                the types of entities detected. Defaults to True.
+            aggregate_redaction (bool): If True, detected entities are anonymized using a generic
+                [redacted] marker. If False, the specific entity type is used in the redaction.
+                Defaults to True.
+
+        Returns:
+            TransformersEntityRecognitionResponse or TransformersEntityRecognitionSimpleResponse:
+            A response object containing information about the presence of entities, an explanation
+            of the detection process, and optionally, the anonymized text if entities were detected
+            and anonymization is enabled.
         """
         # Detect entities
         detected_entities = self._detect_entities(prompt)

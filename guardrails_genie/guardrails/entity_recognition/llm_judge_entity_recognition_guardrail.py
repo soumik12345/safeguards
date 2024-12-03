@@ -54,6 +54,36 @@ class RestrictedTermsRecognitionResponse(BaseModel):
 
 
 class RestrictedTermsJudge(Guardrail):
+    """
+    A class to detect and analyze restricted terms and their variations in text using an LLM model.
+
+    The RestrictedTermsJudge class extends the Guardrail class and utilizes an OpenAIModel
+    to identify restricted terms and their variations within a given text. It provides
+    functionality to format prompts for the LLM, predict restricted terms, and optionally
+    anonymize detected terms in the text.
+
+    !!! example "Using RestrictedTermsJudge"
+        ```python
+        from guardrails_genie.guardrails.entity_recognition import RestrictedTermsJudge
+
+        # Initialize with OpenAI model
+        guardrail = RestrictedTermsJudge(should_anonymize=True)
+
+        # Check for specific terms
+        result = guardrail.guard(
+            text="Let's implement features like Salesforce",
+            custom_terms=["Salesforce", "Oracle", "AWS"]
+        )
+        ```
+
+    Attributes:
+        llm_model (OpenAIModel): An instance of OpenAIModel used for predictions.
+        should_anonymize (bool): A flag indicating whether detected terms should be anonymized.
+
+    Args:
+        should_anonymize (bool): A flag indicating whether detected terms should be anonymized.
+    """
+
     llm_model: OpenAIModel = Field(default_factory=lambda: OpenAIModel())
     should_anonymize: bool = False
 
@@ -139,14 +169,32 @@ Return your analysis in the structured format specified by the RestrictedTermsAn
         **kwargs,
     ) -> RestrictedTermsRecognitionResponse:
         """
-        Guard against restricted terms and their variations.
+        Analyzes the provided text to identify and handle restricted terms and their variations.
+
+        This function utilizes a predictive model to scan the input text for any occurrences of
+        specified restricted terms, including their variations such as misspellings, abbreviations,
+        and case differences. It returns a detailed analysis of the findings, including whether
+        restricted terms were detected, a summary of the matches, and an optional anonymized version
+        of the text.
+
+        The function operates by first calling the `predict` method to perform the analysis based on
+        the given text and custom terms. If restricted terms are found, it constructs a summary of
+        these findings. Additionally, if anonymization is enabled, it replaces detected terms in the
+        text with a redacted placeholder or a specific match type indicator, depending on the
+        `aggregate_redaction` flag.
 
         Args:
-            text: Text to analyze
-            custom_terms: List of restricted terms to check for
+            text (str): The text to be analyzed for restricted terms.
+            custom_terms (List[str]): A list of restricted terms to check against the text. Defaults
+                to a predefined list of company names.
+            aggregate_redaction (bool): Determines the anonymization strategy. If True, all matches
+                are replaced with "[redacted]". If False, matches are replaced
+                with their match type in uppercase.
 
         Returns:
-            RestrictedTermsRecognitionResponse containing safety assessment and detailed analysis
+            RestrictedTermsRecognitionResponse: An object containing the results of the analysis,
+                including whether restricted terms were found, a dictionary of detected entities,
+                a summary explanation, and the anonymized text if applicable.
         """
         analysis = self.predict(text, custom_terms, **kwargs)
 

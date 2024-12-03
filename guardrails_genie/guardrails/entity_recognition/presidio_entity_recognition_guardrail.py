@@ -36,6 +36,49 @@ class PresidioEntityRecognitionSimpleResponse(BaseModel):
 
 # TODO: Add support for transformers workflow and not just Spacy
 class PresidioEntityRecognitionGuardrail(Guardrail):
+    """
+    A guardrail class for entity recognition and anonymization using Presidio.
+
+    This class extends the Guardrail base class to provide functionality for
+    detecting and optionally anonymizing entities in text using the Presidio
+    library. It leverages Presidio's AnalyzerEngine and AnonymizerEngine to
+    perform these tasks.
+
+    !!! example "Using PresidioEntityRecognitionGuardrail"
+        ```python
+        from guardrails_genie.guardrails.entity_recognition import PresidioEntityRecognitionGuardrail
+
+        # Initialize with default entities
+        guardrail = PresidioEntityRecognitionGuardrail(should_anonymize=True)
+
+        # Or with specific entities
+        selected_entities = ["CREDIT_CARD", "US_SSN", "EMAIL_ADDRESS"]
+        guardrail = PresidioEntityRecognitionGuardrail(
+            selected_entities=selected_entities,
+            should_anonymize=True
+        )
+        ```
+
+    Attributes:
+        analyzer (AnalyzerEngine): The Presidio engine used for entity analysis.
+        anonymizer (AnonymizerEngine): The Presidio engine used for text anonymization.
+        selected_entities (List[str]): A list of entity types to detect in the text.
+        should_anonymize (bool): A flag indicating whether detected entities should be anonymized.
+        language (str): The language of the text to be analyzed.
+
+    Args:
+        selected_entities (Optional[List[str]]): A list of entity types to detect in the text.
+        should_anonymize (bool): A flag indicating whether detected entities should be anonymized.
+        language (str): The language of the text to be analyzed.
+        deny_lists (Optional[Dict[str, List[str]]]): A dictionary of entity types and their
+            corresponding deny lists.
+        regex_patterns (Optional[Dict[str, List[Dict[str, str]]]]): A dictionary of entity
+            types and their corresponding regex patterns.
+        custom_recognizers (Optional[List[Any]]): A list of custom recognizers to add to the
+            analyzer.
+        show_available_entities (bool): A flag indicating whether to print available entities.
+    """
+
     @staticmethod
     def get_available_entities() -> List[str]:
         registry = RecognizerRegistry()
@@ -137,11 +180,24 @@ class PresidioEntityRecognitionGuardrail(Guardrail):
         self, prompt: str, return_detected_types: bool = True, **kwargs
     ) -> PresidioEntityRecognitionResponse | PresidioEntityRecognitionSimpleResponse:
         """
-        Check if the input prompt contains any entities using Presidio.
+        Analyzes the input prompt for entity recognition using the Presidio framework.
+
+        This function utilizes the Presidio AnalyzerEngine to detect entities within the
+        provided text prompt. It supports custom recognizers, deny lists, and regex patterns
+        for entity detection. The detected entities are grouped by their types and an
+        explanation of the findings is generated. If anonymization is enabled, the detected
+        entities in the text are anonymized.
 
         Args:
-            prompt: The text to analyze
-            return_detected_types: If True, returns detailed entity type information
+            prompt (str): The text to be analyzed for entity recognition.
+            return_detected_types (bool): Determines the type of response. If True, the
+                response includes detailed information about detected entity types.
+
+        Returns:
+            PresidioEntityRecognitionResponse | PresidioEntityRecognitionSimpleResponse:
+            A response object containing information about whether entities were detected,
+            the types and instances of detected entities, an explanation of the analysis,
+            and optionally, the anonymized text if anonymization is enabled.
         """
         # Analyze text for entities
         analyzer_results = self.analyzer.analyze(

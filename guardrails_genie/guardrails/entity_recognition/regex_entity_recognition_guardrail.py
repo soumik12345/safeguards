@@ -30,6 +30,40 @@ class RegexEntityRecognitionSimpleResponse(BaseModel):
 
 
 class RegexEntityRecognitionGuardrail(Guardrail):
+    """
+    A guardrail class for recognizing and optionally anonymizing entities in text using regular expressions.
+
+    This class extends the Guardrail base class and utilizes a RegexModel to detect entities in the input text
+    based on predefined or custom regex patterns. It provides functionality to check for entities, anonymize
+    detected entities, and return detailed information about the detected entities.
+
+    !!! example "Using RegexEntityRecognitionGuardrail"
+        ```python
+        from guardrails_genie.guardrails.entity_recognition import RegexEntityRecognitionGuardrail
+
+        # Initialize with default PII patterns
+        guardrail = RegexEntityRecognitionGuardrail(should_anonymize=True)
+
+        # Or with custom patterns
+        custom_patterns = {
+            "employee_id": r"EMP\d{6}",
+            "project_code": r"PRJ-[A-Z]{2}-\d{4}"
+        }
+        guardrail = RegexEntityRecognitionGuardrail(patterns=custom_patterns, should_anonymize=True)
+        ```
+
+    Attributes:
+        regex_model (RegexModel): An instance of RegexModel used for entity recognition.
+        patterns (Dict[str, str]): A dictionary of regex patterns for entity recognition.
+        should_anonymize (bool): A flag indicating whether detected entities should be anonymized.
+        DEFAULT_PATTERNS (ClassVar[Dict[str, str]]): A dictionary of default regex patterns for common entities.
+
+    Args:
+        use_defaults (bool): If True, use default patterns. If False, use custom patterns.
+        should_anonymize (bool): If True, anonymize detected entities.
+        show_available_entities (bool): If True, print available entity types.
+    """
+
     regex_model: RegexModel
     patterns: Dict[str, str] = {}
     should_anonymize: bool = False
@@ -107,16 +141,29 @@ class RegexEntityRecognitionGuardrail(Guardrail):
         **kwargs,
     ) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:
         """
-        Check if the input prompt contains any entities based on the regex patterns.
+        Analyzes the input prompt to detect entities based on predefined or custom regex patterns.
+
+        This function checks the provided text (prompt) for entities using regex patterns. It can
+        utilize either default patterns or custom terms provided by the user. If custom terms are
+        specified, they are converted into regex patterns, and only these are used for entity detection.
+        The function returns detailed information about detected entities and can optionally anonymize
+        the detected entities in the text.
 
         Args:
-            prompt: Input text to check for entities
-            custom_terms: List of custom terms to be converted into regex patterns. If provided,
-                        only these terms will be checked, ignoring default patterns.
-            return_detected_types: If True, returns detailed entity type information
+            prompt (str): The input text to be analyzed for entity detection.
+            custom_terms (Optional[list[str]]): A list of custom terms to be converted into regex patterns.
+                If provided, only these terms will be checked, ignoring default patterns.
+            return_detected_types (bool): If True, the function returns detailed information about the
+                types of entities detected in the text.
+            aggregate_redaction (bool): Determines the anonymization strategy. If True, all detected
+                entities are replaced with a generic "[redacted]" label. If False, each entity type is
+                replaced with its specific label (e.g., "[ENTITY_TYPE]").
 
         Returns:
-            RegexEntityRecognitionResponse or RegexEntityRecognitionSimpleResponse containing detection results
+            RegexEntityRecognitionResponse or RegexEntityRecognitionSimpleResponse: An object containing
+            the results of the entity detection, including whether entities were found, the types and
+            counts of detected entities, an explanation of the detection process, and optionally, the
+            anonymized text.
         """
         if custom_terms:
             # Create a temporary RegexModel with only the custom patterns

@@ -62,6 +62,12 @@ nav:
   - Guardrails:
     - Guardrail Base Class: 'guardrails/base.md'
     - Guardrail Manager: 'guardrails/manager.md'
+    - Entity Recognition Guardrails:
+      - About: 'guardrails/entity_recognition/entity_recognition_guardrails.md'
+      - Regex Entity Recognition Guardrail: 'guardrails/entity_recognition/regex_entity_recognition_guardrail.md'
+      - Presidio Entity Recognition Guardrail: 'guardrails/entity_recognition/presidio_entity_recognition_guardrail.md'
+      - Transformers Entity Recognition Guardrail: 'guardrails/entity_recognition/transformers_entity_recognition_guardrail.md'
+      - LLM Judge for Entity Recognition Guardrail: 'guardrails/entity_recognition/llm_judge_entity_recognition_guardrail.md'
     - Prompt Injection Guardrails:
       - Classifier Guardrail: 'guardrails/prompt_injection/classifier.md'
       - Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
