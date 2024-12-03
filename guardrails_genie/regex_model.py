@@ -12,20 +12,17 @@ class RegexResult(BaseModel):
 
 
 class RegexModel(weave.Model):
+    """
+        Initialize RegexModel with a dictionary of patterns.
+
+        Args:
+            patterns (Dict[str, str]): Dictionary where key is pattern name and value is regex pattern.
+    """
     patterns: Optional[Union[dict[str, str], dict[str, list[str]]]] = None
 
     def __init__(
         self, patterns: Optional[Union[dict[str, str], dict[str, list[str]]]] = None
     ) -> None:
-        """
-        Initialize RegexModel with a dictionary of patterns.
-
-        Args:
-            patterns: Dictionary where key is pattern name and value is regex pattern or a list of patterns.
-                     Example: {"email": r"[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+",
-                              "phone": [r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b"]}
-
-        """
         super().__init__(patterns=patterns)
         normalized_patterns = {}
         for k, v in patterns.items():

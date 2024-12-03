@@ -11,6 +11,15 @@ from ..base import Guardrail
 
 
 class PromptInjectionClassifierGuardrail(Guardrail):
+    """
+    A guardrail that uses a pre-trained text-classification model to classify prompts
+    for potential injection attacks.
+
+    Args:
+        model_name (str): The name of the HuggingFace model or a WandB
+            checkpoint artifact path to use for classification.
+    """
+
     model_name: str = "ProtectAI/deberta-v3-base-prompt-injection-v2"
     _classifier: Optional[Pipeline] = None
 
@@ -39,6 +48,24 @@ class PromptInjectionClassifierGuardrail(Guardrail):
 
     @weave.op()
     def guard(self, prompt: str):
+        """
+        Analyzes the given prompt to determine if it is safe or potentially an injection attack.
+
+        This function uses a pre-trained text-classification model to classify the prompt.
+        It calls the `classify` method to get the classification result, which includes a label
+        and a confidence score. The function then calculates the confidence percentage and
+        returns a dictionary with two keys:
+
+        - "safe": A boolean indicating whether the prompt is safe (True) or an injection (False).
+        - "summary": A string summarizing the classification result, including the label and the
+          confidence percentage.
+
+        Args:
+            prompt (str): The input prompt to be classified.
+
+        Returns:
+            dict: A dictionary containing the safety status and a summary of the classification result.
+        """
         response = self.classify(prompt)
         confidence_percentage = round(response[0]["score"] * 100, 2)
         return {

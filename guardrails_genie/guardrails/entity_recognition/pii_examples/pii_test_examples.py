@@ -18,8 +18,8 @@ Emergency Contact: Mary Johnson (Tel: 098-765-4321)
             "SURNAME": ["Smith", "Johnson"],
             "EMAIL": ["john.smith@company.com"],
             "PHONE_NUMBER": ["123-456-7890", "098-765-4321"],
-            "SOCIALNUM": ["123-45-6789"]
-        }
+            "SOCIALNUM": ["123-45-6789"],
+        },
     },
     {
         "description": "Meeting Notes with Attendees",
@@ -39,8 +39,8 @@ Action Items:
             "GIVENNAME": ["Sarah", "Robert", "Tom", "Bob"],
             "SURNAME": ["Williams", "Brown", "Wilson"],
             "EMAIL": ["sarah.w@company.com", "bobby@email.com"],
-            "PHONE_NUMBER": ["555-0123-4567", "777-888-9999"]
-        }
+            "PHONE_NUMBER": ["555-0123-4567", "777-888-9999"],
+        },
     },
     {
         "description": "Medical Record",
@@ -57,8 +57,8 @@ Emergency Contact: Michael Thompson (555-123-4567)
             "GIVENNAME": ["Emma", "James", "Michael"],
             "SURNAME": ["Thompson", "Wilson", "Thompson"],
             "EMAIL": ["emma.t@email.com"],
-            "PHONE_NUMBER": ["555-123-4567"]
-        }
+            "PHONE_NUMBER": ["555-123-4567"],
+        },
     },
     {
         "description": "No PII Content",
@@ -68,7 +68,7 @@ Project Status Update:
 - Budget is within limits
 - Next review scheduled for next week
 """,
-        "expected_entities": {}
+        "expected_entities": {},
     },
     {
         "description": "Mixed Format Phone Numbers",
@@ -84,10 +84,10 @@ Emergency: 555 444 3333
                 "(555) 123-4567",
                 "555.987.6543",
                 "+1-555-321-7890",
-                "555 444 3333"
+                "555 444 3333",
             ]
-        }
-    }
+        },
+    },
 ]
 
 # Additional examples can be added to test specific edge cases or formats
@@ -103,13 +103,14 @@ bob.jones123@domain.co.uk
             "EMAIL": [
                 "JoHn.DoE@company.com",
                 "JANE_SMITH@email.com",
-                "bob.jones123@domain.co.uk"
+                "bob.jones123@domain.co.uk",
             ],
             "GIVENNAME": ["John", "Jane", "Bob"],
-            "SURNAME": ["Doe", "Smith", "Jones"]
-        }
+            "SURNAME": ["Doe", "Smith", "Jones"],
+        },
     }
 ]
+
 
 def validate_entities(detected: dict, expected: dict) -> bool:
     """Compare detected entities with expected entities"""
@@ -117,23 +118,26 @@ def validate_entities(detected: dict, expected: dict) -> bool:
         return False
     return all(set(detected[k]) == set(expected[k]) for k in expected.keys())
 
+
 def run_test_case(guardrail, test_case, test_type="Main"):
     """Run a single test case and print results"""
     print(f"\n{test_type} Test Case: {test_case['description']}")
     print("-" * 50)
-    
-    result = guardrail.guard(test_case['input_text'])
-    expected = test_case['expected_entities']
-    
+
+    result = guardrail.guard(test_case["input_text"])
+    expected = test_case["expected_entities"]
+
     # Validate results
     matches = validate_entities(result.detected_entities, expected)
-    
+
     print(f"Test Status: {'✓ PASS' if matches else '✗ FAIL'}")
     print(f"Contains PII: {result.contains_entities}")
-    
+
     if not matches:
         print("\nEntity Comparison:")
-        all_entity_types = set(list(result.detected_entities.keys()) + list(expected.keys()))
+        all_entity_types = set(
+            list(result.detected_entities.keys()) + list(expected.keys())
+        )
         for entity_type in all_entity_types:
             detected = set(result.detected_entities.get(entity_type, []))
             expected_set = set(expected.get(entity_type, []))
@@ -143,8 +147,8 @@ def run_test_case(guardrail, test_case, test_type="Main"):
             if detected != expected_set:
                 print(f"  Missing: {sorted(expected_set - detected)}")
                 print(f"  Extra: {sorted(detected - expected_set)}")
-    
+
     if result.anonymized_text:
         print(f"\nAnonymized Text:\n{result.anonymized_text}")
-    
+
     return matches

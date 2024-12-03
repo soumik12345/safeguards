@@ -1,15 +1,22 @@
-from guardrails_genie.guardrails.entity_recognition.presidio_entity_recognition_guardrail import PresidioEntityRecognitionGuardrail
-from guardrails_genie.guardrails.entity_recognition.pii_examples.pii_test_examples import PII_TEST_EXAMPLES, EDGE_CASE_EXAMPLES, run_test_case, validate_entities
 import weave
+
+from guardrails_genie.guardrails.entity_recognition.pii_examples.pii_test_examples import (
+    EDGE_CASE_EXAMPLES,
+    PII_TEST_EXAMPLES,
+    run_test_case,
+)
+from guardrails_genie.guardrails.entity_recognition.presidio_entity_recognition_guardrail import (
+    PresidioEntityRecognitionGuardrail,
+)
+
 
 def test_pii_detection():
     """Test PII detection scenarios using predefined test cases"""
     weave.init("guardrails-genie-pii-presidio-model")
-    
+
     # Create the guardrail with default entities and anonymization enabled
     pii_guardrail = PresidioEntityRecognitionGuardrail(
-        should_anonymize=True,
-        show_available_entities=True
+        should_anonymize=True, show_available_entities=True
     )
 
     # Test statistics
@@ -37,6 +44,7 @@ def test_pii_detection():
     print(f"Passed: {passed_tests}")
     print(f"Failed: {total_tests - passed_tests}")
     print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+
 
 if __name__ == "__main__":
     test_pii_detection()

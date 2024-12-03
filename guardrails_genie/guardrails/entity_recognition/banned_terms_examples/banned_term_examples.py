@@ -11,15 +11,22 @@ I think we should implement features similar to Salesforce's Einstein AI
 and Oracle's Cloud Infrastructure. Maybe we could also look at how 
 AWS handles their lambda functions.
 """,
-        "custom_terms": ["Salesforce", "Oracle", "AWS", "Einstein AI", "Cloud Infrastructure", "lambda"],
+        "custom_terms": [
+            "Salesforce",
+            "Oracle",
+            "AWS",
+            "Einstein AI",
+            "Cloud Infrastructure",
+            "lambda",
+        ],
         "expected_entities": {
             "Salesforce": ["Salesforce"],
             "Oracle": ["Oracle"],
             "AWS": ["AWS"],
             "Einstein AI": ["Einstein AI"],
             "Cloud Infrastructure": ["Cloud Infrastructure"],
-            "lambda": ["lambda"]
-        }
+            "lambda": ["lambda"],
+        },
     },
     {
         "description": "Inappropriate Language in Support Ticket",
@@ -32,8 +39,8 @@ stupid service? I've wasted so much freaking time on this crap.
             "damn": ["damn"],
             "hell": ["hell"],
             "stupid": ["stupid"],
-            "crap": ["crap"]
-        }
+            "crap": ["crap"],
+        },
     },
     {
         "description": "Confidential Project Names",
@@ -45,9 +52,9 @@ with Project Phoenix team and the Blue Dragon initiative for resource allocation
         "expected_entities": {
             "Project Titan": ["Project Titan"],
             "Project Phoenix": ["Project Phoenix"],
-            "Blue Dragon": ["Blue Dragon"]
-        }
-    }
+            "Blue Dragon": ["Blue Dragon"],
+        },
+    },
 ]
 
 # Edge cases and special formats
@@ -59,15 +66,22 @@ MSFT's Azure and O365 platform is gaining market share.
 Have you seen what GOOGL/GOOG and FB/META are doing with their AI?
 CRM (Salesforce) and ORCL (Oracle) have interesting features too.
 """,
-        "custom_terms": ["Microsoft", "Google", "Meta", "Facebook", "Salesforce", "Oracle"],
+        "custom_terms": [
+            "Microsoft",
+            "Google",
+            "Meta",
+            "Facebook",
+            "Salesforce",
+            "Oracle",
+        ],
         "expected_entities": {
             "Microsoft": ["MSFT"],
             "Google": ["GOOGL", "GOOG"],
             "Meta": ["META"],
             "Facebook": ["FB"],
             "Salesforce": ["CRM", "Salesforce"],
-            "Oracle": ["ORCL"]
-        }
+            "Oracle": ["ORCL"],
+        },
     },
     {
         "description": "L33t Speak and Intentional Obfuscation",
@@ -76,15 +90,22 @@ S4l3sf0rc3 is better than 0r4cl3!
 M1cr0$oft and G00gl3 are the main competitors.
 Let's check F8book and Met@ too.
 """,
-        "custom_terms": ["Salesforce", "Oracle", "Microsoft", "Google", "Facebook", "Meta"],
+        "custom_terms": [
+            "Salesforce",
+            "Oracle",
+            "Microsoft",
+            "Google",
+            "Facebook",
+            "Meta",
+        ],
         "expected_entities": {
             "Salesforce": ["S4l3sf0rc3"],
             "Oracle": ["0r4cl3"],
             "Microsoft": ["M1cr0$oft"],
             "Google": ["G00gl3"],
             "Facebook": ["F8book"],
-            "Meta": ["Met@"]
-        }
+            "Meta": ["Met@"],
+        },
     },
     {
         "description": "Case Variations and Partial Matches",
@@ -98,8 +119,8 @@ Have you tried micro-soft or Google_Cloud?
             "Microsoft": ["MicroSoft", "micro-soft"],
             "Google": ["google", "Google_Cloud"],
             "Salesforce": ["salesFORCE"],
-            "Oracle": ["ORACLE"]
-        }
+            "Oracle": ["ORACLE"],
+        },
     },
     {
         "description": "Common Misspellings and Typos",
@@ -113,8 +134,8 @@ Salezforce and Oracel need checking too.
             "Microsoft": ["Microsft", "Microsooft"],
             "Google": ["Goggle", "Googel", "Gooogle"],
             "Salesforce": ["Salezforce"],
-            "Oracle": ["Oracel"]
-        }
+            "Oracle": ["Oracel"],
+        },
     },
     {
         "description": "Mixed Variations and Context",
@@ -123,7 +144,15 @@ The M$ cloud competes with AWS (Amazon Web Services).
 FB/Meta's social platform and GOOGL's search dominate.
 SF.com and Oracle-DB are industry standards.
 """,
-        "custom_terms": ["Microsoft", "Amazon Web Services", "Facebook", "Meta", "Google", "Salesforce", "Oracle"],
+        "custom_terms": [
+            "Microsoft",
+            "Amazon Web Services",
+            "Facebook",
+            "Meta",
+            "Google",
+            "Salesforce",
+            "Oracle",
+        ],
         "expected_entities": {
             "Microsoft": ["M$"],
             "Amazon Web Services": ["AWS"],
@@ -131,10 +160,11 @@ SF.com and Oracle-DB are industry standards.
             "Meta": ["Meta"],
             "Google": ["GOOGL"],
             "Salesforce": ["SF.com"],
-            "Oracle": ["Oracle-DB"]
-        }
-    }
+            "Oracle": ["Oracle-DB"],
+        },
+    },
 ]
+
 
 def validate_entities(detected: dict, expected: dict) -> bool:
     """Compare detected entities with expected entities"""
@@ -142,26 +172,28 @@ def validate_entities(detected: dict, expected: dict) -> bool:
         return False
     return all(set(detected[k]) == set(expected[k]) for k in expected.keys())
 
+
 def run_test_case(guardrail, test_case, test_type="Main"):
     """Run a single test case and print results"""
     print(f"\n{test_type} Test Case: {test_case['description']}")
     print("-" * 50)
-    
+
     result = guardrail.guard(
-        test_case['input_text'],
-        custom_terms=test_case['custom_terms']
+        test_case["input_text"], custom_terms=test_case["custom_terms"]
     )
-    expected = test_case['expected_entities']
-    
+    expected = test_case["expected_entities"]
+
     # Validate results
     matches = validate_entities(result.detected_entities, expected)
-    
+
     print(f"Test Status: {'✓ PASS' if matches else '✗ FAIL'}")
     print(f"Contains Restricted Terms: {result.contains_entities}")
-    
+
     if not matches:
         print("\nEntity Comparison:")
-        all_entity_types = set(list(result.detected_entities.keys()) + list(expected.keys()))
+        all_entity_types = set(
+            list(result.detected_entities.keys()) + list(expected.keys())
+        )
         for entity_type in all_entity_types:
             detected = set(result.detected_entities.get(entity_type, []))
             expected_set = set(expected.get(entity_type, []))
@@ -171,8 +203,8 @@ def run_test_case(guardrail, test_case, test_type="Main"):
             if detected != expected_set:
                 print(f"  Missing: {sorted(expected_set - detected)}")
                 print(f"  Extra: {sorted(detected - expected_set)}")
-    
+
     if result.anonymized_text:
         print(f"\nAnonymized Text:\n{result.anonymized_text}")
-    
+
     return matches
