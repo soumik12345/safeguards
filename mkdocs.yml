@@ -59,6 +59,8 @@ extra_javascript:
 
 nav:
   - Home: 'index.md'
+  - Metrics: 'metrics.md'
+  - RegexModel: 'regex_model.md'
   - Utils: 'utils.md'
 
 repo_url: https://github.com/soumik12345/guardrails-genie
