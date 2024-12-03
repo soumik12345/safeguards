@@ -89,6 +89,13 @@ def initialize_guardrails():
                     guardrail_name,
                 )(should_anonymize=True)
             )
+        else:
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )()
+            )
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
     )

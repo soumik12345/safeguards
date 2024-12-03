@@ -73,6 +73,7 @@ nav:
     - Prompt Injection Guardrails:
       - Classifier Guardrail: 'guardrails/prompt_injection/classifier.md'
       - Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
+    - Secrets Detection Guardrail: "guardrails/secrets_detection.md"
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'
   - RegexModel: 'regex_model.md'

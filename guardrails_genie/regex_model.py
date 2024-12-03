@@ -1,14 +1,14 @@
-import re
-from typing import Dict, List
+from typing import Optional, Union
 
+import regex as re
 import weave
 from pydantic import BaseModel
 
 
 class RegexResult(BaseModel):
     passed: bool
-    matched_patterns: Dict[str, List[str]]
-    failed_patterns: List[str]
+    matched_patterns: dict[str, list[str]]
+    failed_patterns: list[str]
 
 
 class RegexModel(weave.Model):
@@ -19,16 +19,22 @@ class RegexModel(weave.Model):
         patterns (Dict[str, str]): Dictionary where key is pattern name and value is regex pattern.
     """
 
-    patterns: Dict[str, str]
+    patterns: Optional[Union[dict[str, str], dict[str, list[str]]]] = None
 
-    def __init__(self, patterns: Dict[str, str]) -> None:
+    def __init__(
+        self, patterns: Optional[Union[dict[str, str], dict[str, list[str]]]] = None
+    ) -> None:
         super().__init__(patterns=patterns)
+        normalized_patterns = {}
+        for k, v in patterns.items():
+            normalized_patterns[k] = v if isinstance(v, list) else [v]
         self._compiled_patterns = {
-            name: re.compile(pattern) for name, pattern in patterns.items()
+            name: [re.compile(p) for p in pattern]
+            for name, pattern in normalized_patterns.items()
         }
 
     @weave.op()
-    def check(self, prompt: str) -> RegexResult:
+    def check(self, text: str) -> RegexResult:
         """
         Check text against all patterns and return detailed results.
 
@@ -41,17 +47,18 @@ class RegexModel(weave.Model):
         matched_patterns = {}
         failed_patterns = []
 
-        for pattern_name, pattern in self.patterns.items():
+        for pattern_name, pats in self._compiled_patterns.items():
             matches = []
-            for match in re.finditer(pattern, prompt):
-                if match.groups():
-                    # If there are capture groups, join them with a separator
-                    matches.append(
-                        "-".join(str(g) for g in match.groups() if g is not None)
-                    )
-                else:
-                    # If no capture groups, use the full match
-                    matches.append(match.group(0))
+            for pattern in pats:
+                for match in pattern.finditer(text):
+                    if match.groups():
+                        # If there are capture groups, join them with a separator
+                        matches.append(
+                            "-".join(str(g) for g in match.groups() if g is not None)
+                        )
+                    else:
+                        # If no capture groups, use the full match
+                        matches.append(match.group(0))
 
             if matches:
                 matched_patterns[pattern_name] = matches
