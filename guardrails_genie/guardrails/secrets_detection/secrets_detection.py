@@ -2,7 +2,7 @@ import hashlib
 import json
 import pathlib
 from enum import Enum
-from typing import Union, Optional
+from typing import Optional, Union
 
 import weave
 from pydantic import BaseModel

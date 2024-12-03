@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Optional, Union
 
 import regex as re
 import weave
@@ -13,11 +13,12 @@ class RegexResult(BaseModel):
 
 class RegexModel(weave.Model):
     """
-        Initialize RegexModel with a dictionary of patterns.
+    Initialize RegexModel with a dictionary of patterns.
 
-        Args:
-            patterns (Dict[str, str]): Dictionary where key is pattern name and value is regex pattern.
+    Args:
+        patterns (Dict[str, str]): Dictionary where key is pattern name and value is regex pattern.
     """
+
     patterns: Optional[Union[dict[str, str], dict[str, list[str]]]] = None
 
     def __init__(
