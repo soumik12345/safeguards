@@ -16,6 +16,22 @@ import wandb
 
 
 class StreamlitProgressbarCallback(TrainerCallback):
+    """
+    StreamlitProgressbarCallback is a custom callback for the Hugging Face Trainer
+    that integrates a progress bar into a Streamlit application. This class updates
+    the progress bar at each training step, providing real-time feedback on the
+    training process within the Streamlit interface.
+
+    Attributes:
+        progress_bar (streamlit.delta_generator.DeltaGenerator): A Streamlit progress
+            bar object initialized to 0 with the text "Training".
+
+    Methods:
+        on_step_begin(args, state, control, **kwargs):
+            Updates the progress bar at the beginning of each training step. The progress
+            is calculated as the percentage of completed steps out of the total steps.
+            The progress bar text is updated to show the current step and the total steps.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +58,8 @@ def train_binary_classifier(
     dataset_repo: str = "geekyrakshit/prompt-injection-dataset",
     model_name: str = "distilbert/distilbert-base-uncased",
     prompt_column_name: str = "prompt",
+    id2label: dict[int, str] = {0: "SAFE", 1: "INJECTION"},
+    label2id: dict[str, int] = {"SAFE": 0, "INJECTION": 1},
     learning_rate: float = 1e-5,
     batch_size: int = 16,
     num_epochs: int = 2,
@@ -49,6 +67,38 @@ def train_binary_classifier(
     save_steps: int = 1000,
     streamlit_mode: bool = False,
 ):
+    """
+    Trains a binary classifier using a specified dataset and model architecture.
+
+    This function sets up and trains a binary sequence classification model using
+    the Hugging Face Transformers library. It integrates with Weights & Biases for
+    experiment tracking and optionally displays a progress bar in a Streamlit app.
+
+    Args:
+        project_name (str): The name of the Weights & Biases project.
+        entity_name (str): The Weights & Biases entity (user or team).
+        run_name (str): The name of the Weights & Biases run.
+        dataset_repo (str, optional): The Hugging Face dataset repository to load.
+        model_name (str, optional): The pre-trained model to use.
+        prompt_column_name (str, optional): The column name in the dataset containing
+            the text prompts.
+        id2label (dict[int, str], optional): Mapping from label IDs to label names.
+        label2id (dict[str, int], optional): Mapping from label names to label IDs.
+        learning_rate (float, optional): The learning rate for training.
+        batch_size (int, optional): The batch size for training and evaluation.
+        num_epochs (int, optional): The number of training epochs.
+        weight_decay (float, optional): The weight decay for the optimizer.
+        save_steps (int, optional): The number of steps between model checkpoints.
+        streamlit_mode (bool, optional): If True, integrates with Streamlit to display
+            a progress bar.
+
+    Returns:
+        dict: The output of the training process, including metrics and model state.
+
+    Raises:
+        Exception: If an error occurs during training, the exception is raised after
+            ensuring Weights & Biases run is finished.
+    """
     wandb.init(project=project_name, entity=entity_name, name=run_name)
     if streamlit_mode:
         st.markdown(
@@ -68,9 +118,6 @@ def train_binary_classifier(
         predictions, labels = eval_pred
         predictions = np.argmax(predictions, axis=1)
         return accuracy.compute(predictions=predictions, references=labels)
-
-    id2label = {0: "SAFE", 1: "INJECTION"}
-    label2id = {"SAFE": 0, "INJECTION": 1}
 
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name,

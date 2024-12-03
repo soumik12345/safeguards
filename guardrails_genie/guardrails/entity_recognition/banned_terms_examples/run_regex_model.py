@@ -1,19 +1,22 @@
-from guardrails_genie.guardrails.entity_recognition.regex_entity_recognition_guardrail import RegexEntityRecognitionGuardrail
-from guardrails_genie.guardrails.entity_recognition.banned_terms_examples.banned_term_examples import (
-    RESTRICTED_TERMS_EXAMPLES, 
-    EDGE_CASE_EXAMPLES, 
-    run_test_case
-)
 import weave
+
+from guardrails_genie.guardrails.entity_recognition.banned_terms_examples.banned_term_examples import (
+    EDGE_CASE_EXAMPLES,
+    RESTRICTED_TERMS_EXAMPLES,
+    run_test_case,
+)
+from guardrails_genie.guardrails.entity_recognition.regex_entity_recognition_guardrail import (
+    RegexEntityRecognitionGuardrail,
+)
+
 
 def test_restricted_terms_detection():
     """Test restricted terms detection scenarios using predefined test cases"""
     weave.init("guardrails-genie-restricted-terms-regex-model")
-    
+
     # Create the guardrail with anonymization enabled
     regex_guardrail = RegexEntityRecognitionGuardrail(
-        use_defaults=False,  # Don't use default PII patterns
-        should_anonymize=True
+        use_defaults=False, should_anonymize=True  # Don't use default PII patterns
     )
 
     # Test statistics
@@ -41,6 +44,7 @@ def test_restricted_terms_detection():
     print(f"Passed: {passed_tests}")
     print(f"Failed: {total_tests - passed_tests}")
     print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+
 
 if __name__ == "__main__":
     test_restricted_terms_detection()
