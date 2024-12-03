@@ -9,6 +9,7 @@ from guardrails_genie.guardrails.injection import (
     PromptInjectionSurveyGuardrail,
 )
 from guardrails_genie.guardrails.secrets_detection import SecretsDetectionGuardrail
+from guardrails_genie.guardrails.sourcecode_detection import SourceCodeDetector
 from .manager import GuardrailManager
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "RestrictedTermsJudge",
     "GuardrailManager",
     "SecretsDetectionGuardrail",
+    "SourceCodeDetector",
 ]
