@@ -79,24 +79,18 @@ def train_binary_classifier(
         entity_name (str): The Weights & Biases entity (user or team).
         run_name (str): The name of the Weights & Biases run.
         dataset_repo (str, optional): The Hugging Face dataset repository to load.
-            Defaults to "geekyrakshit/prompt-injection-dataset".
-        model_name (str, optional): The pre-trained model to use. Defaults to
-            "distilbert/distilbert-base-uncased".
+        model_name (str, optional): The pre-trained model to use.
         prompt_column_name (str, optional): The column name in the dataset containing
-            the text prompts. Defaults to "prompt".
+            the text prompts.
         id2label (dict[int, str], optional): Mapping from label IDs to label names.
-            Defaults to {0: "SAFE", 1: "INJECTION"}.
         label2id (dict[str, int], optional): Mapping from label names to label IDs.
-            Defaults to {"SAFE": 0, "INJECTION": 1}.
-        learning_rate (float, optional): The learning rate for training. Defaults to 1e-5.
+        learning_rate (float, optional): The learning rate for training.
         batch_size (int, optional): The batch size for training and evaluation.
-            Defaults to 16.
-        num_epochs (int, optional): The number of training epochs. Defaults to 2.
-        weight_decay (float, optional): The weight decay for the optimizer. Defaults to 0.01.
+        num_epochs (int, optional): The number of training epochs.
+        weight_decay (float, optional): The weight decay for the optimizer.
         save_steps (int, optional): The number of steps between model checkpoints.
-            Defaults to 1000.
         streamlit_mode (bool, optional): If True, integrates with Streamlit to display
-            a progress bar. Defaults to False.
+            a progress bar.
 
     Returns:
         dict: The output of the training process, including metrics and model state.
