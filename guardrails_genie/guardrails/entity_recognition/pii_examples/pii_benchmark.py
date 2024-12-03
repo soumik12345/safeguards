@@ -257,7 +257,7 @@ def print_metrics_summary(metrics: Dict):
 
 def main():
     """Main evaluation function"""
-    weave.init("guardrails-genie-pii-evaluation")
+    weave.init("guardrails-genie-pii-evaluation-demo")
     
     # Load test cases
     test_cases = load_ai4privacy_dataset(num_samples=100)
