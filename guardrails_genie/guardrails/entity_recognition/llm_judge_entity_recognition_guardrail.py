@@ -1,15 +1,16 @@
 from typing import Dict, List, Optional
+
+import instructor
 import weave
 from pydantic import BaseModel, Field
-from typing_extensions import Annotated
 
 from ...llm import OpenAIModel
 from ..base import Guardrail
-import instructor
 
 
 class TermMatch(BaseModel):
     """Represents a matched term and its variations"""
+
     original_term: str
     matched_text: str
     match_type: str = Field(
@@ -22,19 +23,18 @@ class TermMatch(BaseModel):
 
 class RestrictedTermsAnalysis(BaseModel):
     """Analysis result for restricted terms detection"""
+
     contains_restricted_terms: bool = Field(
         description="Whether any restricted terms were detected"
     )
     detected_matches: List[TermMatch] = Field(
         default_factory=list,
-        description="List of detected term matches with their variations"
+        description="List of detected term matches with their variations",
     )
-    explanation: str = Field(
-        description="Detailed explanation of the analysis"
-    )
+    explanation: str = Field(description="Detailed explanation of the analysis")
     anonymized_text: Optional[str] = Field(
         default=None,
-        description="Text with restricted terms replaced with category tags"
+        description="Text with restricted terms replaced with category tags",
     )
 
     @property
@@ -106,39 +106,57 @@ Return your analysis in the structured format specified by the RestrictedTermsAn
         return user_prompt, system_prompt
 
     @weave.op()
-    def predict(self, text: str, custom_terms: List[str], **kwargs) -> RestrictedTermsAnalysis:
+    def predict(
+        self, text: str, custom_terms: List[str], **kwargs
+    ) -> RestrictedTermsAnalysis:
         user_prompt, system_prompt = self.format_prompts(text, custom_terms)
-        
+
         response = self.llm_model.predict(
             user_prompts=user_prompt,
             system_prompt=system_prompt,
             response_format=RestrictedTermsAnalysis,
             temperature=0.1,  # Lower temperature for more consistent analysis
-            **kwargs
+            **kwargs,
         )
-        
+
         return response.choices[0].message.parsed
 
-    #TODO: Remove default custom_terms
+    # TODO: Remove default custom_terms
     @weave.op()
-    def guard(self, text: str, custom_terms: List[str] = ["Microsoft", "Amazon Web Services", "Facebook", "Meta", "Google", "Salesforce", "Oracle"], aggregate_redaction: bool = True, **kwargs) -> RestrictedTermsRecognitionResponse:
+    def guard(
+        self,
+        text: str,
+        custom_terms: List[str] = [
+            "Microsoft",
+            "Amazon Web Services",
+            "Facebook",
+            "Meta",
+            "Google",
+            "Salesforce",
+            "Oracle",
+        ],
+        aggregate_redaction: bool = True,
+        **kwargs,
+    ) -> RestrictedTermsRecognitionResponse:
         """
         Guard against restricted terms and their variations.
-        
+
         Args:
             text: Text to analyze
             custom_terms: List of restricted terms to check for
-            
+
         Returns:
             RestrictedTermsRecognitionResponse containing safety assessment and detailed analysis
         """
         analysis = self.predict(text, custom_terms, **kwargs)
-        
+
         # Create a summary of findings
         if analysis.contains_restricted_terms:
             summary_parts = ["Restricted terms detected:"]
             for match in analysis.detected_matches:
-                summary_parts.append(f"\n- {match.original_term}: {match.matched_text} ({match.match_type})")
+                summary_parts.append(
+                    f"\n- {match.original_term}: {match.matched_text} ({match.match_type})"
+                )
             summary = "\n".join(summary_parts)
         else:
             summary = "No restricted terms detected."
@@ -148,8 +166,14 @@ Return your analysis in the structured format specified by the RestrictedTermsAn
         if self.should_anonymize and analysis.contains_restricted_terms:
             anonymized_text = text
             for match in analysis.detected_matches:
-                replacement = "[redacted]" if aggregate_redaction else f"[{match.match_type.upper()}]"
-                anonymized_text = anonymized_text.replace(match.matched_text, replacement)
+                replacement = (
+                    "[redacted]"
+                    if aggregate_redaction
+                    else f"[{match.match_type.upper()}]"
+                )
+                anonymized_text = anonymized_text.replace(
+                    match.matched_text, replacement
+                )
 
         # Convert detected_matches to a dictionary format
         detected_entities = {}
@@ -162,5 +186,5 @@ Return your analysis in the structured format specified by the RestrictedTermsAn
             contains_entities=analysis.contains_restricted_terms,
             detected_entities=detected_entities,
             explanation=summary,
-            anonymized_text=anonymized_text
+            anonymized_text=anonymized_text,
         )

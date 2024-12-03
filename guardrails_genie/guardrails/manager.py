@@ -1,6 +1,6 @@
 import weave
-from rich.progress import track
 from pydantic import BaseModel
+from rich.progress import track
 
 from .base import Guardrail
 

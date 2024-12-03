@@ -19,9 +19,9 @@ class EvaluationCallManager:
     """
     Manages the evaluation calls for a specific project and entity in Weave.
 
-    This class is responsible for initializing and managing evaluation calls associated with a 
-    specific project and entity. It provides functionality to collect guardrail guard calls 
-    from evaluation predictions and scores, and render these calls into a structured format 
+    This class is responsible for initializing and managing evaluation calls associated with a
+    specific project and entity. It provides functionality to collect guardrail guard calls
+    from evaluation predictions and scores, and render these calls into a structured format
     suitable for display in Streamlit.
 
     Args:
@@ -30,6 +30,7 @@ class EvaluationCallManager:
         call_id (str): The call id.
         max_count (int): The maximum number of guardrail guard calls to collect from the evaluation.
     """
+
     def __init__(self, entity: str, project: str, call_id: str, max_count: int = 10):
         self.base_call = weave.init(f"{entity}/{project}").get_call(call_id=call_id)
         self.max_count = max_count
@@ -40,10 +41,10 @@ class EvaluationCallManager:
         """
         Collects guardrail guard calls from evaluation predictions and scores.
 
-        This function iterates through the children calls of the base evaluation call, 
-        extracting relevant guardrail guard calls and their associated scores. It stops 
-        collecting calls if it encounters an "Evaluation.summarize" operation or if the 
-        maximum count of guardrail guard calls is reached. The collected calls are stored 
+        This function iterates through the children calls of the base evaluation call,
+        extracting relevant guardrail guard calls and their associated scores. It stops
+        collecting calls if it encounters an "Evaluation.summarize" operation or if the
+        maximum count of guardrail guard calls is reached. The collected calls are stored
         in a list of dictionaries, each containing the input prompt, outputs, and score.
 
         Returns:
@@ -77,9 +78,9 @@ class EvaluationCallManager:
         Renders the collected guardrail guard calls into a pandas DataFrame suitable for
         display in Streamlit.
 
-        This function processes the collected guardrail guard calls stored in `self.call_list` and 
-        organizes them into a dictionary format that can be easily converted into a pandas DataFrame. 
-        The DataFrame contains columns for the input prompts, the safety status of the outputs, and 
+        This function processes the collected guardrail guard calls stored in `self.call_list` and
+        organizes them into a dictionary format that can be easily converted into a pandas DataFrame.
+        The DataFrame contains columns for the input prompts, the safety status of the outputs, and
         the correctness of the predictions for each guardrail.
 
         The structure of the DataFrame is as follows:
@@ -87,7 +88,7 @@ class EvaluationCallManager:
         - Subsequent columns contain the safety status and prediction correctness for each guardrail.
 
         Returns:
-            pd.DataFrame: A DataFrame containing the input prompts, safety status, and prediction 
+            pd.DataFrame: A DataFrame containing the input prompts, safety status, and prediction
                           correctness for each guardrail.
         """
         dataframe = {

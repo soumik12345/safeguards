@@ -1,12 +1,12 @@
-from .injection import (
-    PromptInjectionClassifierGuardrail,
-    PromptInjectionSurveyGuardrail,
-)
 from .entity_recognition import (
     PresidioEntityRecognitionGuardrail,
     RegexEntityRecognitionGuardrail,
-    TransformersEntityRecognitionGuardrail,
     RestrictedTermsJudge,
+    TransformersEntityRecognitionGuardrail,
+)
+from .injection import (
+    PromptInjectionClassifierGuardrail,
+    PromptInjectionSurveyGuardrail,
 )
 from .manager import GuardrailManager
 
