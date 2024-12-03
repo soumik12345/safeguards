@@ -37,7 +37,7 @@ class TransformersEntityRecognitionGuardrail(Guardrail):
         model_name: str = "iiiorg/piiranha-v1-detect-personal-information",
         selected_entities: Optional[List[str]] = None,
         should_anonymize: bool = False,
-        show_available_entities: bool = True,
+        show_available_entities: bool = False,
     ):
         # Load model config and extract available entities
         config = AutoConfig.from_pretrained(model_name)

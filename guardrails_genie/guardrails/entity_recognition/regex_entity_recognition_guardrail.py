@@ -1,4 +1,4 @@
-from typing import Dict, Optional, ClassVar
+from typing import Dict, Optional, ClassVar, List
 
 import weave
 from pydantic import BaseModel
@@ -35,24 +35,34 @@ class RegexEntityRecognitionGuardrail(Guardrail):
     should_anonymize: bool = False
     
     DEFAULT_PATTERNS: ClassVar[Dict[str, str]] = {
-        "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-        "phone_number": r"\b(?:\+?1[-.]?)?\(?(?:[0-9]{3})\)?[-.]?(?:[0-9]{3})[-.]?(?:[0-9]{4})\b",
-        "ssn": r"\b\d{3}[-]?\d{2}[-]?\d{4}\b",
-        "credit_card": r"\b\d{4}[-.]?\d{4}[-.]?\d{4}[-.]?\d{4}\b",
-        "ip_address": r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b",
-        "date_of_birth": r"\b\d{2}[-/]\d{2}[-/]\d{4}\b",
-        "passport": r"\b[A-Z]{1,2}[0-9]{6,9}\b",
-        "drivers_license": r"\b[A-Z]\d{7}\b",
-        "bank_account": r"\b\d{8,17}\b",
-        "zip_code": r"\b\d{5}(?:[-]\d{4})?\b"
+        "EMAIL": r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+        "TELEPHONENUM": r'\b(\+\d{1,3}[-.]?)?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}\b',
+        "SOCIALNUM": r'\b\d{3}[-]?\d{2}[-]?\d{4}\b',
+        "CREDITCARDNUMBER": r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b',
+        "DATEOFBIRTH": r'\b(0[1-9]|1[0-2])[-/](0[1-9]|[12]\d|3[01])[-/](19|20)\d{2}\b',
+        "DRIVERLICENSENUM": r'[A-Z]\d{7}',  # Example pattern, adjust for your needs
+        "ACCOUNTNUM": r'\b\d{10,12}\b',  # Example pattern for bank accounts
+        "ZIPCODE": r'\b\d{5}(?:-\d{4})?\b',
+        "GIVENNAME": r'\b[A-Z][a-z]+\b',  # Basic pattern for first names
+        "SURNAME": r'\b[A-Z][a-z]+\b',    # Basic pattern for last names
+        "CITY": r'\b[A-Z][a-z]+(?:[\s-][A-Z][a-z]+)*\b',
+        "STREET": r'\b\d+\s+[A-Z][a-z]+\s+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr)\b',
+        "IDCARDNUM": r'[A-Z]\d{7,8}',  # Generic pattern for ID cards
+        "USERNAME": r'@[A-Za-z]\w{3,}',  # Basic username pattern
+        "PASSWORD": r'[A-Za-z0-9@#$%^&+=]{8,}',  # Basic password pattern
+        "TAXNUM": r'\b\d{2}[-]\d{7}\b',  # Example tax number pattern
+        "BUILDINGNUM": r'\b\d+[A-Za-z]?\b'  # Basic building number pattern
     }
     
-    def __init__(self, use_defaults: bool = True, should_anonymize: bool = False, **kwargs):
+    def __init__(self, use_defaults: bool = True, should_anonymize: bool = False, show_available_entities: bool = False, **kwargs):
         patterns = {}
         if use_defaults:
             patterns = self.DEFAULT_PATTERNS.copy()
         if kwargs.get("patterns"):
             patterns.update(kwargs["patterns"])
+
+        if show_available_entities:
+            self._print_available_entities(patterns.keys())
         
         # Create the RegexModel instance
         regex_model = RegexModel(patterns=patterns)
@@ -72,6 +82,14 @@ class RegexEntityRecognitionGuardrail(Guardrail):
         escaped_text = re.escape(text)
         # Create a pattern that matches the exact text, case-insensitive
         return rf"\b{escaped_text}\b"
+    
+    def _print_available_entities(self, entities: List[str]):
+        """Print available entities"""
+        print("\nAvailable entity types:")
+        print("=" * 25)
+        for entity in entities:
+            print(f"- {entity}")
+        print("=" * 25 + "\n")
 
     @weave.op()
     def guard(self, prompt: str, custom_terms: Optional[list[str]] = None, return_detected_types: bool = True, aggregate_redaction: bool = True, **kwargs) -> RegexEntityRecognitionResponse | RegexEntityRecognitionSimpleResponse:

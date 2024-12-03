@@ -60,12 +60,9 @@ class PresidioEntityRecognitionGuardrail(Guardrail):
                 print(f"- {entity}")
             print("=" * 25 + "\n")
 
-        # Initialize default values
+        # Initialize default values to all available entities
         if selected_entities is None:
-            selected_entities = [
-                "CREDIT_CARD", "US_SSN", "EMAIL_ADDRESS", "PHONE_NUMBER",
-                "IP_ADDRESS", "URL", "DATE_TIME"
-            ]
+            selected_entities = self.get_available_entities()
         
         # Get available entities dynamically
         available_entities = self.get_available_entities()
@@ -135,7 +132,7 @@ class PresidioEntityRecognitionGuardrail(Guardrail):
         """
         # Analyze text for entities
         analyzer_results = self.analyzer.analyze(
-            text=prompt,
+            text=str(prompt),
             entities=self.selected_entities,
             language=self.language
         )

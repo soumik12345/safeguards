@@ -28,7 +28,7 @@ class RegexModel(weave.Model):
         }
 
     @weave.op()
-    def check(self, text: str) -> RegexResult:
+    def check(self, prompt: str) -> RegexResult:
         """
         Check text against all patterns and return detailed results.
         
@@ -38,23 +38,28 @@ class RegexModel(weave.Model):
         Returns:
             RegexResult containing pass/fail status and details about matches
         """
-        matches: Dict[str, List[str]] = {}
-        failed_patterns: List[str] = []
+        matched_patterns = {}
+        failed_patterns = []
         
-        for pattern_name, compiled_pattern in self._compiled_patterns.items():
-            found_matches = compiled_pattern.findall(text)
-            if found_matches:
-                matches[pattern_name] = found_matches
+        for pattern_name, pattern in self.patterns.items():
+            matches = []
+            for match in re.finditer(pattern, prompt):
+                if match.groups():
+                    # If there are capture groups, join them with a separator
+                    matches.append('-'.join(str(g) for g in match.groups() if g is not None))
+                else:
+                    # If no capture groups, use the full match
+                    matches.append(match.group(0))
+            
+            if matches:
+                matched_patterns[pattern_name] = matches
             else:
                 failed_patterns.append(pattern_name)
         
-        # Consider it passed only if no patterns matched (no PII found)
-        passed = len(matches) == 0
-        
         return RegexResult(
-            passed=passed,
-            matched_patterns=matches,
-            failed_patterns=failed_patterns
+            matched_patterns=matched_patterns,
+            failed_patterns=failed_patterns,
+            passed=len(matched_patterns) == 0
         )
 
     @weave.op()

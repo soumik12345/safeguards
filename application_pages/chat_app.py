@@ -66,28 +66,28 @@ def initialize_guardrails():
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )()
+                )(should_anonymize=True)
             )
         elif guardrail_name == "RegexEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )()
+                )(should_anonymize=True)
             )
         elif guardrail_name == "TransformersEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )()
+                )(should_anonymize=True)
             )
         elif guardrail_name == "RestrictedTermsJudge":
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )()
+                )(should_anonymize=True)
             )
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails

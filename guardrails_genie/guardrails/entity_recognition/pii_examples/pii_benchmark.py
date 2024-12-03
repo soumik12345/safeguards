@@ -6,6 +6,35 @@ import json
 from pathlib import Path
 import weave
 
+# Add this mapping dictionary near the top of the file
+PRESIDIO_TO_TRANSFORMER_MAPPING = {
+    "EMAIL_ADDRESS": "EMAIL",
+    "PHONE_NUMBER": "TELEPHONENUM",
+    "US_SSN": "SOCIALNUM",
+    "CREDIT_CARD": "CREDITCARDNUMBER",
+    "IP_ADDRESS": "IDCARDNUM",
+    "DATE_TIME": "DATEOFBIRTH",
+    "US_PASSPORT": "IDCARDNUM",
+    "US_DRIVER_LICENSE": "DRIVERLICENSENUM",
+    "US_BANK_NUMBER": "ACCOUNTNUM",
+    "LOCATION": "CITY",
+    "URL": "USERNAME",  # URLs often contain usernames
+    "IN_PAN": "TAXNUM",  # Indian Permanent Account Number
+    "UK_NHS": "IDCARDNUM",
+    "SG_NRIC_FIN": "IDCARDNUM",
+    "AU_ABN": "TAXNUM",  # Australian Business Number
+    "AU_ACN": "TAXNUM",  # Australian Company Number
+    "AU_TFN": "TAXNUM",  # Australian Tax File Number
+    "AU_MEDICARE": "IDCARDNUM",
+    "IN_AADHAAR": "IDCARDNUM",  # Indian national ID
+    "IN_VOTER": "IDCARDNUM",
+    "IN_PASSPORT": "IDCARDNUM",
+    "CRYPTO": "ACCOUNTNUM",  # Cryptocurrency addresses
+    "IBAN_CODE": "ACCOUNTNUM",
+    "MEDICAL_LICENSE": "IDCARDNUM",
+    "IN_VEHICLE_REGISTRATION": "IDCARDNUM"
+}
+
 def load_ai4privacy_dataset(num_samples: int = 100, split: str = "validation") -> List[Dict]:
     """
     Load and prepare samples from the ai4privacy dataset.
@@ -81,6 +110,17 @@ def evaluate_model(guardrail, test_cases: List[Dict]) -> Tuple[Dict, List[Dict]]
         detected = result.detected_entities
         expected = test_case['expected_entities']
         
+        # Map Presidio entities if this is the Presidio guardrail
+        if isinstance(guardrail, PresidioEntityRecognitionGuardrail):
+            mapped_detected = {}
+            for entity_type, values in detected.items():
+                mapped_type = PRESIDIO_TO_TRANSFORMER_MAPPING.get(entity_type)
+                if mapped_type:
+                    if mapped_type not in mapped_detected:
+                        mapped_detected[mapped_type] = []
+                    mapped_detected[mapped_type].extend(values)
+            detected = mapped_detected
+        
         # Track entity-level metrics
         all_entity_types = set(list(detected.keys()) + list(expected.keys()))
         entity_results = {}
@@ -137,11 +177,19 @@ def evaluate_model(guardrail, test_cases: List[Dict]) -> Tuple[Dict, List[Dict]]
         else:
             metrics["failed"] += 1
     
-    # Calculate final entity metrics
+    # Calculate final entity metrics and track totals for overall metrics
+    total_tp = 0
+    total_fp = 0
+    total_fn = 0
+    
     for entity_type, counts in metrics["entity_metrics"].items():
         tp = counts["total_true_positives"]
         fp = counts["total_false_positives"]
         fn = counts["total_false_negatives"]
+        
+        total_tp += tp
+        total_fp += fp
+        total_fn += fn
         
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
@@ -152,6 +200,20 @@ def evaluate_model(guardrail, test_cases: List[Dict]) -> Tuple[Dict, List[Dict]]
             "recall": recall,
             "f1": f1
         })
+    
+    # Calculate overall metrics
+    overall_precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0
+    overall_recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
+    overall_f1 = 2 * (overall_precision * overall_recall) / (overall_precision + overall_recall) if (overall_precision + overall_recall) > 0 else 0
+    
+    metrics["overall"] = {
+        "precision": overall_precision,
+        "recall": overall_recall,
+        "f1": overall_f1,
+        "total_true_positives": total_tp,
+        "total_false_positives": total_fp,
+        "total_false_negatives": total_fn
+    }
     
     return metrics, detailed_results
 
@@ -177,6 +239,15 @@ def print_metrics_summary(metrics: Dict):
     print(f"Failed: {metrics['failed']}")
     print(f"Success Rate: {(metrics['passed']/metrics['total'])*100:.1f}%")
     
+    # Print overall metrics
+    print("\nOverall Metrics:")
+    print("-" * 80)
+    print(f"{'Metric':<20} {'Value':>10}")
+    print("-" * 80)
+    print(f"{'Precision':<20} {metrics['overall']['precision']:>10.2f}")
+    print(f"{'Recall':<20} {metrics['overall']['recall']:>10.2f}")
+    print(f"{'F1':<20} {metrics['overall']['f1']:>10.2f}")
+    
     print("\nEntity-level Metrics:")
     print("-" * 80)
     print(f"{'Entity Type':<20} {'Precision':>10} {'Recall':>10} {'F1':>10}")
@@ -193,9 +264,9 @@ def main():
     
     # Initialize models to evaluate
     models = {
-        "regex": RegexEntityRecognitionGuardrail(should_anonymize=True),
-        "presidio": PresidioEntityRecognitionGuardrail(should_anonymize=True),
-        "transformers": TransformersEntityRecognitionGuardrail(should_anonymize=True)
+        "regex": RegexEntityRecognitionGuardrail(should_anonymize=True, show_available_entities=True),
+        "presidio": PresidioEntityRecognitionGuardrail(should_anonymize=True, show_available_entities=True),
+        "transformers": TransformersEntityRecognitionGuardrail(should_anonymize=True, show_available_entities=True)
     }
     
     # Evaluate each model
