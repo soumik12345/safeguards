@@ -14,7 +14,6 @@ class PromptInjectionLlamaGuardrail(Guardrail):
     temperature: float = 1.0
     jailbreak_score_threshold: float = 0.5
     indirect_injection_score_threshold: float = 0.5
-    device: str = "cuda" if torch.cuda.is_available() else "cpu"
     _tokenizer: Optional[AutoTokenizer] = None
     _model: Optional[AutoModelForSequenceClassification] = None
 
@@ -32,7 +31,6 @@ class PromptInjectionLlamaGuardrail(Guardrail):
             truncation=True,
             max_length=self.max_sequence_length,
         )
-        inputs = inputs.to(self.device)
         with torch.no_grad():
             logits = self._model(**inputs).logits
         scaled_logits = logits / self.temperature
@@ -58,12 +56,12 @@ class PromptInjectionLlamaGuardrail(Guardrail):
             summary += f"Prompt is deemed to be a jailbreak attempt with {confidence}% confidence."
         if score["indirect_injection_score"] > self.indirect_injection_score_threshold:
             confidence = round(score["indirect_injection_score"] * 100, 2)
-            summary += f"Prompt is deemed to be an indirect injection attempt with {confidence}% confidence."
+            summary += f" Prompt is deemed to be an indirect injection attempt with {confidence}% confidence."
         return {
             "safe": score["jailbreak_score"] < self.jailbreak_score_threshold
             and score["indirect_injection_score"]
             < self.indirect_injection_score_threshold,
-            "summary": summary,
+            "summary": summary.strip(),
         }
 
     @weave.op()
