@@ -16,10 +16,32 @@ class SurveyGuardrailResponse(BaseModel):
 
 
 class PromptInjectionSurveyGuardrail(Guardrail):
+    """
+    A guardrail that uses a summarized version of the research paper
+    [An Early Categorization of Prompt Injection Attacks on Large Language Models](https://arxiv.org/abs/2402.00898)
+    to assess whether a prompt is a prompt injection attack or not.
+
+    Args:
+        llm_model (OpenAIModel): The LLM model to use for the guardrail.
+    """
+
     llm_model: OpenAIModel
 
     @weave.op()
     def load_prompt_injection_survey(self) -> str:
+        """
+        Loads the prompt injection survey content from a markdown file, wraps it in
+        `<research_paper>...</research_paper>` tags, and returns it as a string.
+
+        This function constructs the file path to the markdown file containing the
+        summarized research paper on prompt injection attacks. It reads the content
+        of the file, wraps it in <research_paper> tags, and returns the formatted
+        string. This formatted content is used as a reference in the prompt
+        assessment process.
+
+        Returns:
+            str: The content of the prompt injection survey wrapped in <research_paper> tags.
+        """
         prompt_injection_survey_path = os.path.join(
             os.getcwd(), "prompts", "injection_paper_1.md"
         )
@@ -30,6 +52,30 @@ class PromptInjectionSurveyGuardrail(Guardrail):
 
     @weave.op()
     def format_prompts(self, prompt: str) -> str:
+        """
+        Formats the user and system prompts for assessing potential prompt injection attacks.
+
+        This function constructs two types of prompts: a user prompt and a system prompt.
+        The user prompt includes the content of a research paper on prompt injection attacks,
+        which is loaded using the `load_prompt_injection_survey` method. This content is
+        wrapped in a specific format to serve as a reference for the assessment process.
+        The user prompt also includes the input prompt that needs to be evaluated for
+        potential injection attacks, enclosed within <input_prompt> tags.
+
+        The system prompt provides detailed instructions to an expert system on how to
+        analyze the input prompt. It specifies that the system should use the research
+        papers as a reference to determine if the input prompt is a prompt injection attack,
+        and if so, classify it as a direct or indirect attack and identify the specific type.
+        The system is instructed to provide a detailed explanation of its assessment,
+        citing specific parts of the research papers, and to follow strict guidelines
+        to ensure accuracy and clarity.
+
+        Args:
+            prompt (str): The input prompt to be assessed for potential injection attacks.
+
+        Returns:
+            tuple: A tuple containing the formatted user prompt and system prompt.
+        """
         markdown_text = self.load_prompt_injection_survey()
         user_prompt = f"""You are given the following research papers as reference:\n\n{markdown_text}"""
         user_prompt += f"""
@@ -62,6 +108,21 @@ Here are some strict instructions that you must follow:
 
     @weave.op()
     def predict(self, prompt: str, **kwargs) -> list[str]:
+        """
+        Predicts whether the given input prompt is a prompt injection attack.
+
+        This function formats the user and system prompts using the `format_prompts` method,
+        which includes the content of research papers and the input prompt to be assessed.
+        It then uses the `llm_model` to predict the nature of the input prompt by providing
+        the formatted prompts and expecting a response in the `SurveyGuardrailResponse` format.
+
+        Args:
+            prompt (str): The input prompt to be assessed for potential injection attacks.
+            **kwargs: Additional keyword arguments to be passed to the `llm_model.predict` method.
+
+        Returns:
+            list[str]: The parsed response from the model, indicating the assessment of the input prompt.
+        """
         user_prompt, system_prompt = self.format_prompts(prompt)
         chat_completion = self.llm_model.predict(
             user_prompts=user_prompt,
@@ -74,6 +135,22 @@ Here are some strict instructions that you must follow:
 
     @weave.op()
     def guard(self, prompt: str, **kwargs) -> list[str]:
+        """
+        Assesses the given input prompt for potential prompt injection attacks and provides a summary.
+
+        This function uses the `predict` method to determine whether the input prompt is a prompt injection attack.
+        It then constructs a summary based on the prediction, indicating whether the prompt is safe or an attack.
+        If the prompt is deemed an attack, the summary specifies whether it is a direct or indirect attack and the type of attack.
+
+        Args:
+            prompt (str): The input prompt to be assessed for potential injection attacks.
+            **kwargs: Additional keyword arguments to be passed to the `predict` method.
+
+        Returns:
+            dict: A dictionary containing:
+                - "safe" (bool): Indicates whether the prompt is safe (True) or an injection attack (False).
+                - "summary" (str): A summary of the assessment, including the type of attack and explanation if applicable.
+        """
         response = self.predict(prompt, **kwargs)
         summary = (
             f"Prompt is deemed safe. {response.explanation}"

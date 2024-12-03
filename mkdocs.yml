@@ -59,6 +59,12 @@ extra_javascript:
 
 nav:
   - Home: 'index.md'
+  - Guardrails:
+    - Guardrail Base Class: 'guardrails/base.md'
+    - Guardrail Manager: 'guardrails/manager.md'
+    - Prompt Injection Guardrails:
+      - Classifier Guardrail: 'guardrails/prompt_injection/classifier.md'
+      - Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'
   - RegexModel: 'regex_model.md'

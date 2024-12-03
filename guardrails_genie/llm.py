@@ -10,13 +10,14 @@ class OpenAIModel(weave.Model):
     A class to interface with OpenAI's language models using the Weave framework.
 
     This class provides methods to create structured messages and generate predictions
-    using OpenAI's chat completion API. It is designed to work with both single and 
-    multiple user prompts, and optionally includes a system prompt to guide the model's 
+    using OpenAI's chat completion API. It is designed to work with both single and
+    multiple user prompts, and optionally includes a system prompt to guide the model's
     responses.
 
     Args:
         model_name (str): The name of the OpenAI model to be used for predictions.
     """
+
     model_name: str
     _openai_client: OpenAI
 
@@ -34,19 +35,19 @@ class OpenAIModel(weave.Model):
         """
         Create a list of messages for the OpenAI chat completion API.
 
-        This function constructs a list of messages in the format required by the 
-        OpenAI chat completion API. It takes user prompts, an optional system prompt, 
-        and an optional list of existing messages, and combines them into a single 
+        This function constructs a list of messages in the format required by the
+        OpenAI chat completion API. It takes user prompts, an optional system prompt,
+        and an optional list of existing messages, and combines them into a single
         list of messages.
 
         Args:
-            user_prompts (Union[str, list[str]]): A single user prompt or a list of 
+            user_prompts (Union[str, list[str]]): A single user prompt or a list of
                 user prompts to be included in the messages.
-            system_prompt (Optional[str]): An optional system prompt to guide the 
-                model's responses. If provided, it will be added at the beginning 
+            system_prompt (Optional[str]): An optional system prompt to guide the
+                model's responses. If provided, it will be added at the beginning
                 of the messages list.
-            messages (Optional[list[dict]]): An optional list of existing messages 
-                to which the new prompts will be appended. If not provided, a new 
+            messages (Optional[list[dict]]): An optional list of existing messages
+                to which the new prompts will be appended. If not provided, a new
                 list will be created.
 
         Returns:
@@ -71,21 +72,21 @@ class OpenAIModel(weave.Model):
         """
         Generate a chat completion response using the OpenAI API.
 
-        This function takes user prompts, an optional system prompt, and an optional 
-        list of existing messages to create a list of messages formatted for the 
-        OpenAI chat completion API. It then sends these messages to the OpenAI API 
+        This function takes user prompts, an optional system prompt, and an optional
+        list of existing messages to create a list of messages formatted for the
+        OpenAI chat completion API. It then sends these messages to the OpenAI API
         to generate a chat completion response.
 
         Args:
-            user_prompts (Union[str, list[str]]): A single user prompt or a list of 
+            user_prompts (Union[str, list[str]]): A single user prompt or a list of
                 user prompts to be included in the messages.
-            system_prompt (Optional[str]): An optional system prompt to guide the 
-                model's responses. If provided, it will be added at the beginning 
+            system_prompt (Optional[str]): An optional system prompt to guide the
+                model's responses. If provided, it will be added at the beginning
                 of the messages list.
-            messages (Optional[list[dict]]): An optional list of existing messages 
-                to which the new prompts will be appended. If not provided, a new 
+            messages (Optional[list[dict]]): An optional list of existing messages
+                to which the new prompts will be appended. If not provided, a new
                 list will be created.
-            **kwargs: Additional keyword arguments to be passed to the OpenAI API 
+            **kwargs: Additional keyword arguments to be passed to the OpenAI API
                 for chat completion.
 
         Returns:
