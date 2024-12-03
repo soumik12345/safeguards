@@ -3,6 +3,8 @@ site_name: Guardrails Genie
 
 theme:
   name: material
+  logo: assets/wandb_logo.svg
+  favicon: assets/wandb_logo.svg
   palette: 
     # Palette toggle for light mode
     - scheme: default
