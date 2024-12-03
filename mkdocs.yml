@@ -59,6 +59,7 @@ extra_javascript:
 
 nav:
   - Home: 'index.md'
+  - LLM: 'llm.md'
   - Metrics: 'metrics.md'
   - RegexModel: 'regex_model.md'
   - Utils: 'utils.md'
