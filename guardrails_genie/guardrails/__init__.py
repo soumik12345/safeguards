@@ -1,13 +1,14 @@
-from .injection import (
-    PromptInjectionClassifierGuardrail,
-    PromptInjectionSurveyGuardrail,
-)
-from .entity_recognition import (
+from guardrails_genie.guardrails.entity_recognition import (
     PresidioEntityRecognitionGuardrail,
     RegexEntityRecognitionGuardrail,
     TransformersEntityRecognitionGuardrail,
     RestrictedTermsJudge,
 )
+from guardrails_genie.guardrails.injection import (
+    PromptInjectionClassifierGuardrail,
+    PromptInjectionSurveyGuardrail,
+)
+from guardrails_genie.guardrails.secrets_detection import SecretsDetectionGuardrail
 from .manager import GuardrailManager
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "TransformersEntityRecognitionGuardrail",
     "RestrictedTermsJudge",
     "GuardrailManager",
+    "SecretsDetectionGuardrail",
 ]
