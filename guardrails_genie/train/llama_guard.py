@@ -213,6 +213,7 @@ class LlamaGuardFineTuner:
             project=self.wandb_project,
             entity=self.wandb_entity,
             name=f"{self.model_name}-{self.dataset_name}",
+            job_type="fine-tune-llama-guard",
         )
         self.model.classifier = nn.Linear(
             self.model.classifier.in_features, num_classes

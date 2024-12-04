@@ -62,7 +62,12 @@ def train_binary_classifier(
         Exception: If an error occurs during training, the exception is raised after
             ensuring Weights & Biases run is finished.
     """
-    wandb.init(project=project_name, entity=entity_name, name=run_name)
+    wandb.init(
+        project=project_name,
+        entity=entity_name,
+        name=run_name,
+        job_type="train-binary-classifier",
+    )
     if streamlit_mode:
         st.markdown(
             f"Explore your training logs on [Weights & Biases]({wandb.run.url})"
