@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -208,7 +209,15 @@ class LlamaGuardFineTuner:
         )
         return encodings.input_ids, encodings.attention_mask, labels
 
-    def train(self, batch_size: int = 32, lr: float = 5e-6, num_classes: int = 2):
+    def train(
+        self,
+        batch_size: int = 32,
+        lr: float = 5e-6,
+        num_classes: int = 2,
+        log_interval: int = 20,
+        save_interval: int = 1000,
+    ):
+        os.makedirs("checkpoints", exist_ok=True)
         wandb.init(
             project=self.wandb_project,
             entity=self.wandb_entity,
@@ -239,14 +248,16 @@ class LlamaGuardFineTuner:
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            wandb.log({"loss": loss.item()})
+            if (i + 1) % log_interval == 0:
+                wandb.log({"loss": loss.item()}, step=i + 1)
             if progress_bar:
                 progress_percentage = (i + 1) * 100 // len(data_loader)
                 progress_bar.progress(
                     progress_percentage,
                     text=f"Training batch {i + 1}/{len(data_loader)}, Loss: {loss.item()}",
                 )
-        save_model(self.model, f"{self.model_name}-{self.dataset_name}.safetensors")
-        wandb.log_model(f"{self.model_name}-{self.dataset_name}.safetensors")
+            if (i + 1) % save_interval == 0:
+                save_model(self.model, f"checkpoints/model-{i + 1}.safetensors")
+                wandb.log_model(f"checkpoints/model-{i + 1}.safetensors")
         wandb.finish()
-        os.remove(f"{self.model_name}-{self.dataset_name}.safetensors")
+        shutil.rmtree("checkpoints")
