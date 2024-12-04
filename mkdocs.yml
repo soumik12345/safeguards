@@ -72,7 +72,8 @@ nav:
       - LLM Judge for Entity Recognition Guardrail: 'guardrails/entity_recognition/llm_judge_entity_recognition_guardrail.md'
     - Prompt Injection Guardrails:
       - Classifier Guardrail: 'guardrails/prompt_injection/classifier.md'
-      - Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
+      - Llama Prompt Guardrail: 'guardrails/prompt_injection/llama_prompt_guardrail.md'
+      - LLM Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
     - Secrets Detection Guardrail: "guardrails/secrets_detection.md"
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'

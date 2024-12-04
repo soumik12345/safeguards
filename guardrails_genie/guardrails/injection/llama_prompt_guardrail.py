@@ -9,6 +9,25 @@ from ..base import Guardrail
 
 
 class PromptInjectionLlamaGuardrail(Guardrail):
+    """
+    A guardrail class designed to detect and mitigate prompt injection attacks
+    using a pre-trained language model. This class leverages a sequence
+    classification model to evaluate prompts for potential security threats
+    such as jailbreak attempts and indirect injection attempts.
+
+    Attributes:
+        model_name (str): The name of the pre-trained model used for sequence
+            classification.
+        max_sequence_length (int): The maximum length of the input sequence
+            for the tokenizer.
+        temperature (float): A scaling factor for the model's logits to
+            control the randomness of predictions.
+        jailbreak_score_threshold (float): The threshold above which a prompt
+            is considered a jailbreak attempt.
+        indirect_injection_score_threshold (float): The threshold above which
+            a prompt is considered an indirect injection attempt.
+    """
+
     model_name: str = "meta-llama/Prompt-Guard-86M"
     max_sequence_length: int = 512
     temperature: float = 1.0
@@ -46,6 +65,26 @@ class PromptInjectionLlamaGuardrail(Guardrail):
                 probabilities[0, 1] + probabilities[0, 2]
             ).item(),
         }
+
+    """
+    Analyzes a given prompt to determine its safety by evaluating the likelihood
+    of it being a jailbreak or indirect injection attempt.
+
+    This function utilizes the `get_score` method to obtain the probabilities
+    associated with the prompt being a jailbreak or indirect injection attempt.
+    It then compares these probabilities against predefined thresholds to assess
+    the prompt's safety. If the `jailbreak_score` exceeds the `jailbreak_score_threshold`,
+    the prompt is flagged as a potential jailbreak attempt, and a confidence level
+    is calculated and included in the summary. Similarly, if the `indirect_injection_score`
+    surpasses the `indirect_injection_score_threshold`, the prompt is flagged as a potential
+    indirect injection attempt, with its confidence level also included in the summary.
+
+    Returns a dictionary containing:
+        - "safe": A boolean indicating whether the prompt is considered safe
+          (i.e., both scores are below their respective thresholds).
+        - "summary": A string summarizing the findings, including confidence levels
+          for any detected threats.
+    """
 
     @weave.op()
     def guard(self, prompt: str):
