@@ -30,6 +30,26 @@ class LlamaGuardFineTuner:
     classification tasks, specifically for detecting prompt injection attacks. It
     integrates with Weights & Biases for experiment tracking and optionally
     displays progress in a Streamlit app.
+    
+    !!! example "Sample Usage"
+        ```python
+        from guardrails_genie.train.llama_guard import LlamaGuardFineTuner, DatasetArgs
+
+        fine_tuner = LlamaGuardFineTuner(
+            wandb_project="guardrails-genie",
+            wandb_entity="geekyrakshit",
+            streamlit_mode=False,
+        )
+        fine_tuner.load_dataset(
+            DatasetArgs(
+                dataset_address="wandb/synthetic-prompt-injections",
+                train_dataset_range=-1,
+                test_dataset_range=-1,
+            )
+        )
+        fine_tuner.load_model()
+        fine_tuner.train(save_interval=100)
+        ```
 
     Args:
         wandb_project (str): The name of the Weights & Biases project.
@@ -63,6 +83,7 @@ class LlamaGuardFineTuner:
             train_dataset: The selected training dataset.
             test_dataset: The selected testing dataset.
         """
+        self.dataset_args = dataset_args
         dataset = load_dataset(dataset_args.dataset_address)
         self.train_dataset = (
             dataset["train"]
@@ -299,8 +320,8 @@ class LlamaGuardFineTuner:
         batch_size: int = 32,
         lr: float = 5e-6,
         num_classes: int = 2,
-        log_interval: int = 20,
-        save_interval: int = 1000,
+        log_interval: int = 1,
+        save_interval: int = 50,
     ):
         """
         Fine-tunes the pre-trained LlamaGuard model on the training dataset for a single epoch.
@@ -332,13 +353,21 @@ class LlamaGuardFineTuner:
         wandb.init(
             project=self.wandb_project,
             entity=self.wandb_entity,
-            name=f"{self.model_name}-{self.dataset_name}",
+            name=f"{self.model_name}-{self.dataset_args.dataset_address.split('/')[-1]}",
             job_type="fine-tune-llama-guard",
         )
+        wandb.config.dataset_args = self.dataset_args.model_dump()
+        wandb.config.model_name = self.model_name
+        wandb.config.batch_size = batch_size
+        wandb.config.lr = lr
+        wandb.config.num_classes = num_classes
+        wandb.config.log_interval = log_interval
+        wandb.config.save_interval = save_interval
         self.model.classifier = nn.Linear(
             self.model.classifier.in_features, num_classes
         )
         self.model.num_labels = num_classes
+        self.model = self.model.to(self.device)
         self.model.train()
         optimizer = optim.AdamW(self.model.parameters(), lr=lr)
         data_loader = DataLoader(
@@ -367,8 +396,12 @@ class LlamaGuardFineTuner:
                     progress_percentage,
                     text=f"Training batch {i + 1}/{len(data_loader)}, Loss: {loss.item()}",
                 )
-            if (i + 1) % save_interval == 0:
+            if (i + 1) % save_interval == 0 or i + 1 == len(data_loader):
                 save_model(self.model, f"checkpoints/model-{i + 1}.safetensors")
-                wandb.log_model(f"checkpoints/model-{i + 1}.safetensors")
+                wandb.log_model(
+                    f"checkpoints/model-{i + 1}.safetensors",
+                    name=f"{wandb.run.id}-model",
+                    aliases=f"step-{i + 1}",
+                )
         wandb.finish()
         shutil.rmtree("checkpoints")
