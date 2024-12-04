@@ -23,12 +23,14 @@ class LlamaGuardFineTuner:
         dataset = load_dataset(dataset_args.dataset_address)
         self.train_dataset = (
             dataset["train"]
-            if dataset_args.train_dataset_range > 0
+            if dataset_args.train_dataset_range <= 0
+            or dataset_args.train_dataset_range > len(dataset["train"])
             else dataset["train"].select(range(dataset_args.train_dataset_range))
         )
         self.test_dataset = (
             dataset["test"]
-            if dataset_args.test_dataset_range > 0
+            if dataset_args.test_dataset_range <= 0
+            or dataset_args.test_dataset_range > len(dataset["test"])
             else dataset["test"].select(range(dataset_args.test_dataset_range))
         )
 
@@ -69,7 +71,12 @@ class LlamaGuardFineTuner:
         data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
 
         scores = []
-        for batch in track(data_loader, description="Evaluating"):
+        progress_bar = (
+            st.progress(0, text="Evaluating") if self.streamlit_mode else None
+        )
+        for i, batch in track(
+            enumerate(data_loader), description="Evaluating", total=len(data_loader)
+        ):
             input_ids, attention_mask = [b.to(self.device) for b in batch]
             with torch.no_grad():
                 logits = self.model(
@@ -81,6 +88,12 @@ class LlamaGuardFineTuner:
                 probabilities[:, positive_label].cpu().numpy()
             )
             scores.extend(positive_class_probabilities)
+            if progress_bar:
+                progress_percentage = (i + 1) * 100 // len(data_loader)
+                progress_bar.progress(
+                    progress_percentage,
+                    text=f"Evaluating batch {i + 1}/{len(data_loader)}",
+                )
 
         return scores
 
