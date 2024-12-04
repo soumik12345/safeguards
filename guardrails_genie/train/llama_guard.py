@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import streamlit as st
 import torch
 import torch.nn.functional as F
@@ -98,28 +98,87 @@ class LlamaGuardFineTuner:
         return scores
 
     def visualize_roc_curve(self, test_scores: list[float]):
-        plt.figure(figsize=(8, 6))
         test_labels = [int(elt) for elt in self.test_dataset["label"]]
         fpr, tpr, _ = roc_curve(test_labels, test_scores)
         roc_auc = roc_auc_score(test_labels, test_scores)
-        plt.plot(
-            fpr,
-            tpr,
-            color="darkorange",
-            lw=2,
-            label=f"ROC curve (area = {roc_auc:.3f})",
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=fpr,
+                y=tpr,
+                mode="lines",
+                name=f"ROC curve (area = {roc_auc:.3f})",
+                line=dict(color="darkorange", width=2),
+            )
         )
-        plt.plot([0, 1], [0, 1], color="navy", lw=2, linestyle="--")
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel("False Positive Rate")
-        plt.ylabel("True Positive Rate")
-        plt.title("Receiver Operating Characteristic")
-        plt.legend(loc="lower right")
+        fig.add_trace(
+            go.Scatter(
+                x=[0, 1],
+                y=[0, 1],
+                mode="lines",
+                name="Random Guess",
+                line=dict(color="navy", width=2, dash="dash"),
+            )
+        )
+
+        fig.update_layout(
+            title="Receiver Operating Characteristic",
+            xaxis_title="False Positive Rate",
+            yaxis_title="True Positive Rate",
+            xaxis=dict(range=[0.0, 1.0]),
+            yaxis=dict(range=[0.0, 1.05]),
+            legend=dict(x=0.8, y=0.2),
+        )
+
         if self.streamlit_mode:
-            st.pyplot(plt)
+            st.plotly_chart(fig)
         else:
-            plt.show()
+            fig.show()
+
+    def visualize_score_distribution(self, scores: list[float]):
+        test_labels = [int(elt) for elt in self.test_dataset["label"]]
+        positive_scores = [scores[i] for i in range(500) if test_labels[i] == 1]
+        negative_scores = [scores[i] for i in range(500) if test_labels[i] == 0]
+
+        fig = go.Figure()
+
+        # Plotting positive scores
+        fig.add_trace(
+            go.Histogram(
+                x=positive_scores,
+                histnorm="probability density",
+                name="Positive",
+                marker_color="darkblue",
+                opacity=0.75,
+            )
+        )
+
+        # Plotting negative scores
+        fig.add_trace(
+            go.Histogram(
+                x=negative_scores,
+                histnorm="probability density",
+                name="Negative",
+                marker_color="darkred",
+                opacity=0.75,
+            )
+        )
+
+        # Updating layout
+        fig.update_layout(
+            title="Score Distribution for Positive and Negative Examples",
+            xaxis_title="Score",
+            yaxis_title="Density",
+            barmode="overlay",
+            legend_title="Scores",
+        )
+
+        # Display the plot
+        if self.streamlit_mode:
+            st.plotly_chart(fig)
+        else:
+            fig.show()
 
     def evaluate_model(
         self,
@@ -138,4 +197,5 @@ class LlamaGuardFineTuner:
             max_length=max_length,
         )
         self.visualize_roc_curve(test_scores)
+        self.visualize_score_distribution(test_scores)
         return test_scores
