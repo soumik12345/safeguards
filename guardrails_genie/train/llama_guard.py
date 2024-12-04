@@ -24,6 +24,19 @@ class DatasetArgs(BaseModel):
 
 
 class LlamaGuardFineTuner:
+    """
+    `LlamaGuardFineTuner` is a class designed to fine-tune and evaluate the
+    [Prompt Guard model by Meta LLama](meta-llama/Prompt-Guard-86M) for prompt
+    classification tasks, specifically for detecting prompt injection attacks. It
+    integrates with Weights & Biases for experiment tracking and optionally
+    displays progress in a Streamlit app.
+
+    Args:
+        wandb_project (str): The name of the Weights & Biases project.
+        wandb_entity (str): The Weights & Biases entity (user or team).
+        streamlit_mode (bool): If True, integrates with Streamlit to display progress.
+    """
+
     def __init__(
         self, wandb_project: str, wandb_entity: str, streamlit_mode: bool = False
     ):
@@ -32,6 +45,24 @@ class LlamaGuardFineTuner:
         self.streamlit_mode = streamlit_mode
 
     def load_dataset(self, dataset_args: DatasetArgs):
+        """
+        Loads the training and testing datasets based on the provided dataset arguments.
+
+        This function uses the `load_dataset` function from the `datasets` library to load
+        the dataset specified by the `dataset_address` attribute of the `dataset_args` parameter.
+        It then selects a subset of the training and testing datasets based on the specified
+        ranges in `train_dataset_range` and `test_dataset_range` attributes of `dataset_args`.
+        If the specified range is less than or equal to 0 or exceeds the length of the dataset,
+        the entire dataset is used.
+
+        Args:
+            dataset_args (DatasetArgs): An instance of the `DatasetArgs` class containing
+                the dataset address and the ranges for training and testing datasets.
+
+        Attributes:
+            train_dataset: The selected training dataset.
+            test_dataset: The selected testing dataset.
+        """
         dataset = load_dataset(dataset_args.dataset_address)
         self.train_dataset = (
             dataset["train"]
@@ -47,6 +78,22 @@ class LlamaGuardFineTuner:
         )
 
     def load_model(self, model_name: str = "meta-llama/Prompt-Guard-86M"):
+        """
+        Loads the specified pre-trained model and tokenizer for sequence classification tasks.
+
+        This function sets the device to GPU if available, otherwise defaults to CPU. It then
+        loads the tokenizer and model from the Hugging Face model hub using the provided model name.
+        The model is moved to the specified device (GPU or CPU).
+
+        Args:
+            model_name (str): The name of the pre-trained model to load.
+
+        Attributes:
+            device (str): The device to run the model on, either "cuda" for GPU or "cpu".
+            model_name (str): The name of the loaded pre-trained model.
+            tokenizer (AutoTokenizer): The tokenizer associated with the pre-trained model.
+            model (AutoModelForSequenceClassification): The loaded pre-trained model for sequence classification.
+        """
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -55,6 +102,19 @@ class LlamaGuardFineTuner:
         )
 
     def show_dataset_sample(self):
+        """
+        Displays a sample of the training and testing datasets using Streamlit.
+
+        This function checks if the `streamlit_mode` attribute is enabled. If it is,
+        it converts the training and testing datasets to pandas DataFrames and displays
+        the first few rows of each dataset using Streamlit's `dataframe` function. The
+        training dataset sample is displayed under the heading "Train Dataset Sample",
+        and the testing dataset sample is displayed under the heading "Test Dataset Sample".
+
+        Note:
+            This function requires the `streamlit` library to be installed and the
+            `streamlit_mode` attribute to be set to True.
+        """
         if self.streamlit_mode:
             st.markdown("### Train Dataset Sample")
             st.dataframe(self.train_dataset.to_pandas().head())
@@ -189,6 +249,31 @@ class LlamaGuardFineTuner:
         truncation: bool = True,
         max_length: int = 512,
     ):
+        """
+        Evaluates the fine-tuned model on the test dataset and visualizes the results.
+
+        This function evaluates the model by processing the test dataset in batches.
+        It computes the test scores using the `evaluate_batch` method, which takes
+        several parameters to control the evaluation process, such as batch size,
+        positive label, temperature, truncation, and maximum sequence length.
+
+        After obtaining the test scores, it visualizes the performance of the model
+        using two methods:
+        1. `visualize_roc_curve`: Plots the Receiver Operating Characteristic (ROC) curve
+           to show the trade-off between the true positive rate and false positive rate.
+        2. `visualize_score_distribution`: Plots the distribution of scores for positive
+           and negative examples to provide insights into the model's performance.
+
+        Args:
+            batch_size (int, optional): The number of samples to process in each batch.
+            positive_label (int, optional): The label considered as positive for evaluation.
+            temperature (float, optional): The temperature parameter for scaling logits.
+            truncation (bool, optional): Whether to truncate sequences to the maximum length.
+            max_length (int, optional): The maximum length of sequences after truncation.
+
+        Returns:
+            list[float]: The test scores obtained from the evaluation.
+        """
         test_scores = self.evaluate_batch(
             self.test_dataset["text"],
             batch_size=batch_size,
@@ -217,6 +302,32 @@ class LlamaGuardFineTuner:
         log_interval: int = 20,
         save_interval: int = 1000,
     ):
+        """
+        Fine-tunes the pre-trained LlamaGuard model on the training dataset for a single epoch.
+
+        This function sets up and executes the training loop for the LlamaGuard model.
+        It initializes the Weights & Biases (wandb) logging, configures the model's
+        classifier layer to match the specified number of classes, and sets the model
+        to training mode. The function uses an AdamW optimizer to update the model
+        parameters based on the computed loss.
+
+        The training process involves iterating over the training dataset in batches,
+        computing the loss for each batch, and updating the model parameters. The
+        function logs the loss to wandb at specified intervals and optionally displays
+        a progress bar using Streamlit if `streamlit_mode` is enabled. Model checkpoints
+        are saved at specified intervals during training.
+
+        Args:
+            batch_size (int, optional): The number of samples per batch during training.
+            lr (float, optional): The learning rate for the optimizer.
+            num_classes (int, optional): The number of output classes for the classifier.
+            log_interval (int, optional): The interval (in batches) at which to log the loss.
+            save_interval (int, optional): The interval (in batches) at which to save model checkpoints.
+
+        Note:
+            This function requires the `wandb` and `streamlit` libraries to be installed
+            and configured appropriately.
+        """
         os.makedirs("checkpoints", exist_ok=True)
         wandb.init(
             project=self.wandb_project,
