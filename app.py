@@ -18,8 +18,19 @@ train_classifier_page = st.Page(
     title="Train Classifier",
     icon=":material/fitness_center:",
 )
+llama_guard_fine_tuning_page = st.Page(
+    "application_pages/llama_guard_fine_tuning.py",
+    title="Fine-Tune LLama Guard",
+    icon=":material/star:",
+)
 page_navigation = st.navigation(
-    [intro_page, chat_page, evaluation_page, train_classifier_page]
+    [
+        intro_page,
+        chat_page,
+        evaluation_page,
+        train_classifier_page,
+        llama_guard_fine_tuning_page,
+    ]
 )
 st.set_page_config(page_title="Guardrails Genie", page_icon=":material/guardian:")
 page_navigation.run()
