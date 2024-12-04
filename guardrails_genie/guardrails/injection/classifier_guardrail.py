@@ -1,11 +1,10 @@
 from typing import Optional
 
 import torch
+import wandb
 import weave
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 from transformers.pipelines.base import Pipeline
-
-import wandb
 
 from ..base import Guardrail
 
