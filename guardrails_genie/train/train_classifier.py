@@ -1,7 +1,6 @@
 import evaluate
 import numpy as np
 import streamlit as st
-import wandb
 from datasets import load_dataset
 from transformers import (
     AutoModelForSequenceClassification,
@@ -11,6 +10,7 @@ from transformers import (
     TrainingArguments,
 )
 
+import wandb
 from guardrails_genie.utils import StreamlitProgressbarCallback
 
 

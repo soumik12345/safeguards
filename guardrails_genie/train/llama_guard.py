@@ -1,5 +1,7 @@
 import os
 import shutil
+from glob import glob
+from typing import Optional
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -7,14 +9,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import wandb
 from datasets import load_dataset
 from pydantic import BaseModel
 from rich.progress import track
-from safetensors.torch import save_model
+from safetensors.torch import load_model, save_model
 from sklearn.metrics import roc_auc_score, roc_curve
 from torch.utils.data import DataLoader
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+import wandb
 
 
 class DatasetArgs(BaseModel):
@@ -30,7 +33,7 @@ class LlamaGuardFineTuner:
     classification tasks, specifically for detecting prompt injection attacks. It
     integrates with Weights & Biases for experiment tracking and optionally
     displays progress in a Streamlit app.
-    
+
     !!! example "Sample Usage"
         ```python
         from guardrails_genie.train.llama_guard import LlamaGuardFineTuner, DatasetArgs
@@ -98,7 +101,11 @@ class LlamaGuardFineTuner:
             else dataset["test"].select(range(dataset_args.test_dataset_range))
         )
 
-    def load_model(self, model_name: str = "meta-llama/Prompt-Guard-86M"):
+    def load_model(
+        self,
+        model_name: str = "meta-llama/Prompt-Guard-86M",
+        checkpoint: Optional[str] = None,
+    ):
         """
         Loads the specified pre-trained model and tokenizer for sequence classification tasks.
 
@@ -118,9 +125,20 @@ class LlamaGuardFineTuner:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name).to(
-            self.device
-        )
+        if checkpoint is None:
+            self.model = AutoModelForSequenceClassification.from_pretrained(
+                model_name
+            ).to(self.device)
+        else:
+            api = wandb.Api()
+            artifact = api.artifact(checkpoint.removeprefix("wandb://"))
+            artifact_dir = artifact.download()
+            model_file_path = glob(os.path.join(artifact_dir, "model-*.safetensors"))[0]
+            self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+            self.model.classifier = nn.Linear(self.model.classifier.in_features, 2)
+            self.model.num_labels = 2
+            load_model(self.model, model_file_path)
+            self.model = self.model.to(self.device)
 
     def show_dataset_sample(self):
         """
