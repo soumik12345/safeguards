@@ -314,7 +314,7 @@ class LlamaGuardFineTuner:
             list[float]: The test scores obtained from the evaluation.
         """
         test_scores = self.evaluate_batch(
-            self.test_dataset["text"],
+            self.test_dataset["prompt"],
             batch_size=batch_size,
             positive_label=positive_label,
             temperature=temperature,
@@ -326,7 +326,7 @@ class LlamaGuardFineTuner:
         return test_scores
 
     def collate_fn(self, batch):
-        texts = [item["text"] for item in batch]
+        texts = [item["prompt"] for item in batch]
         labels = torch.tensor([int(item["label"]) for item in batch])
         encodings = self.tokenizer(
             texts, padding=True, truncation=True, max_length=512, return_tensors="pt"
@@ -415,11 +415,12 @@ class LlamaGuardFineTuner:
                     text=f"Training batch {i + 1}/{len(data_loader)}, Loss: {loss.item()}",
                 )
             if (i + 1) % save_interval == 0 or i + 1 == len(data_loader):
-                save_model(self.model, f"checkpoints/model-{i + 1}.safetensors")
-                wandb.log_model(
-                    f"checkpoints/model-{i + 1}.safetensors",
-                    name=f"{wandb.run.id}-model",
-                    aliases=f"step-{i + 1}",
-                )
+                with torch.no_grad():
+                    save_model(self.model, f"checkpoints/model-{i + 1}.safetensors")
+                    wandb.log_model(
+                        f"checkpoints/model-{i + 1}.safetensors",
+                        name=f"{wandb.run.id}-model",
+                        aliases=f"step-{i + 1}",
+                    )
         wandb.finish()
         shutil.rmtree("checkpoints")
