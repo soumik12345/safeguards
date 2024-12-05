@@ -76,7 +76,7 @@ class PromptInjectionLlamaGuardrail(Guardrail):
         if self.checkpoint is None:
             self._model = AutoModelForSequenceClassification.from_pretrained(
                 self.model_name
-            ).to(self.device)
+            )
         else:
             api = wandb.Api()
             artifact = api.artifact(self.checkpoint.removeprefix("wandb://"))
