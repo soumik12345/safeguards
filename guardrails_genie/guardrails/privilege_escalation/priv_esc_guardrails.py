@@ -113,3 +113,7 @@ class SQLInjectionGuardrail(Guardrail):
             "safe": predicted_class == 0,
             "summary": f"The prompt is {'' if predicted_class == 0 else 'not '}a SQL injection attack."
         }
+    
+    @weave.op()
+    def predict(self, prompt: str) -> dict:
+        return self.guard(prompt)
