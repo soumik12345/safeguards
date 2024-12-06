@@ -17,8 +17,8 @@ class PrivilegeEscalationGuardrail(Guardrail):
     @weave.op()
     def guard(self, prompt: str, **kwargs):
         return {
-            "is_prev_esc": True,
-            "prev_esc_type": "unknown",
+            "safe": True,
+            "summary": "Prompt is safe.",
         }
 
     @weave.op()
