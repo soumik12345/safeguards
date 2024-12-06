@@ -79,7 +79,9 @@ nav:
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'
   - RegexModel: 'regex_model.md'
-  - Train Classifier: 'train_classifier.md'
+  - Training:
+    - Train Classifier: 'train/train_classifier.md'
+    - Train Llama Guard: 'train/train_llama_guard.md'
   - Utils: 'utils.md'
 
 repo_url: https://github.com/soumik12345/guardrails-genie

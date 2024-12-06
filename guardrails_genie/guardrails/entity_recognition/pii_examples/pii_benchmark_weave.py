@@ -362,7 +362,7 @@ def main():
             preprocess_model_input=preprocess_model_input,
         )
 
-        results = asyncio.run(evaluation.evaluate(guardrail))
+        asyncio.run(evaluation.evaluate(guardrail))
 
 
 if __name__ == "__main__":

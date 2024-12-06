@@ -1,5 +1,12 @@
 import pandas as pd
+import streamlit as st
 import weave
+from transformers.trainer_callback import (
+    TrainerCallback,
+    TrainerControl,
+    TrainerState,
+    TrainingArguments,
+)
 
 
 class EvaluationCallManager:
@@ -91,3 +98,39 @@ class EvaluationCallManager:
                 call["score"]["correct"] for call in guardrail_call["calls"]
             ]
         return pd.DataFrame(dataframe)
+
+
+class StreamlitProgressbarCallback(TrainerCallback):
+    """
+    StreamlitProgressbarCallback is a custom callback for the Hugging Face Trainer
+    that integrates a progress bar into a Streamlit application. This class updates
+    the progress bar at each training step, providing real-time feedback on the
+    training process within the Streamlit interface.
+
+    Attributes:
+        progress_bar (streamlit.delta_generator.DeltaGenerator): A Streamlit progress
+            bar object initialized to 0 with the text "Training".
+
+    Methods:
+        on_step_begin(args, state, control, **kwargs):
+            Updates the progress bar at the beginning of each training step. The progress
+            is calculated as the percentage of completed steps out of the total steps.
+            The progress bar text is updated to show the current step and the total steps.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.progress_bar = st.progress(0, text="Training")
+
+    def on_step_begin(
+        self,
+        args: TrainingArguments,
+        state: TrainerState,
+        control: TrainerControl,
+        **kwargs,
+    ):
+        super().on_step_begin(args, state, control, **kwargs)
+        self.progress_bar.progress(
+            (state.global_step * 100 // state.max_steps) + 1,
+            text=f"Training {state.global_step} / {state.max_steps}",
+        )

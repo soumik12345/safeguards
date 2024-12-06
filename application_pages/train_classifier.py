@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-from guardrails_genie.train_classifier import train_binary_classifier
+from guardrails_genie.train.train_classifier import train_binary_classifier
 
 
 def initialize_session_state():
