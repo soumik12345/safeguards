@@ -169,3 +169,4 @@ binary-classifier/
 wandb/
 artifacts/
 evaluation_results/
+.cache_dir/

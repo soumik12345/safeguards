@@ -1,16 +1,20 @@
-import asyncio
-
-import weave
-from typing import Any
-from pydantic import BaseModel, Field
-from guardrails_genie.llm import AsyncOpenAIModel
-
-from datasets import load_dataset
-
-
-
 from dotenv import load_dotenv
 load_dotenv()
+
+import os
+import json
+import tqdm
+import hashlib
+import asyncio
+import multiprocessing
+from typing import Any
+
+import weave
+from diskcache import Cache
+from datasets import load_dataset
+from pydantic import BaseModel, Field
+
+from guardrails_genie.llm import AsyncOpenAIModel
 
 
 class PrivEscResponse(BaseModel):
@@ -67,6 +71,28 @@ If the prompt is a privilege escalation prompt, return True. Otherwise, return F
 
         return PrivEscDataset(prompt=prompt, priv_esc_response=response)
 
+generate_synthetic_priv_esc_dataset = GenerateSyntheticPrivEscDataset()
+
+# Set up diskcache
+cache_dir = ".cache_dir"
+os.makedirs(cache_dir, exist_ok=True)
+cache = Cache(cache_dir)
+
+
+def hash_prompt(prompt: str) -> str:
+    return hashlib.sha256(prompt.encode('utf-8')).hexdigest()
+
+
+def generate_synthetic_dataset(prompt: str):
+    hash_key = hash_prompt(prompt)
+    if hash_key in cache:
+        return cache.get(hash_key)
+
+    response = asyncio.run(generate_synthetic_priv_esc_dataset.predict(prompt))
+    result_dict = response.model_dump()
+    cache[hash_key] = result_dict
+    return result_dict
+
 
 if __name__ == "__main__":
     # Load the dataet
@@ -78,7 +104,13 @@ if __name__ == "__main__":
     prompt_injections = list(set(train_ds[train_ds.type == "prompt_injection"].prompt.values))
     print("Number of prompt injections: ", len(prompt_injections))
 
-    # Initialize OpenAI classifier
-    generate_synthetic_priv_esc_dataset = GenerateSyntheticPrivEscDataset()
+    output_file = "guardrails_genie/guardrails/privilege_escalation/priv_esc_dataset.jsonl"
+    processes = 8
 
-    print(asyncio.run(generate_synthetic_priv_esc_dataset.predict(prompt_injections[1000])))
+    with open(output_file, "a") as f:
+        with multiprocessing.Pool(processes=processes) as pool:
+            for result in tqdm.tqdm(
+                pool.imap_unordered(generate_synthetic_dataset, prompt_injections),
+                total=len(prompt_injections)
+            ):
+                f.write(json.dumps(result) + "\n")
