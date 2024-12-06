@@ -25,6 +25,10 @@ dependencies = [
     "presidio-analyzer>=2.2.355",
     "presidio-anonymizer>=2.2.355",
     "instructor>=1.7.0",
+    "numpy<2.0.0",
+    "gibberish-detector>=0.1.1",
+    "detect-secrets>=1.5.0",
+    "hyperscan>=0.7.8"
 ]
 
 [project.optional-dependencies]
