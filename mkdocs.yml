@@ -75,6 +75,7 @@ nav:
       - Llama Prompt Guardrail: 'guardrails/prompt_injection/llama_prompt_guardrail.md'
       - LLM Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
     - Secrets Detection Guardrail: "guardrails/secrets_detection.md"
+    - Privilege Escalation Guardrail: "guardrails/privilege_escalation.md"
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'
   - RegexModel: 'regex_model.md'
