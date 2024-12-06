@@ -20,13 +20,32 @@ logger = configure_logger(log_level="ERROR")
 
 
 class GuardrailsAISecretsDetector(Guardrail):
+    """
+    A class to detect secrets using Guardrails AI.
+
+    Attributes:
+        validator (Any): The validator used for detecting secrets.
+    """
+
     validator: Any
 
     def __init__(self):
+        """
+        Initializes the GuardrailsAISecretsDetector with a validator.
+        """
         validator = Guard().use(SecretsPresent, on_fail="fix")
         super().__init__(validator=validator)
 
     def scan(self, text: str) -> dict:
+        """
+        Scans the given text for secrets.
+
+        Args:
+            text (str): The text to scan for secrets.
+
+        Returns:
+            dict: A dictionary containing the scan results.
+        """
         response = self.validator.validate(text)
         if response.validation_summaries:
             summary = response.validation_summaries[0]
@@ -58,6 +77,16 @@ class GuardrailsAISecretsDetector(Guardrail):
         return_detected_secrets: bool = True,
         **kwargs,
     ) -> SecretsDetectionResponse | SecretsDetectionResponse:
+        """
+        Guards the given prompt by scanning for secrets.
+
+        Args:
+            prompt (str): The prompt to scan for secrets.
+            return_detected_secrets (bool): Whether to return detected secrets.
+
+        Returns:
+            SecretsDetectionResponse | SecretsDetectionSimpleResponse: The response after scanning for secrets.
+        """
         results = self.scan(prompt)
 
         if return_detected_secrets:
@@ -78,13 +107,32 @@ class GuardrailsAISecretsDetector(Guardrail):
 
 
 class LLMGuardSecretsDetector(Guardrail):
+    """
+    A class to detect secrets using LLM Guard.
+
+    Attributes:
+        validator (Any): The validator used for detecting secrets.
+    """
+
     validator: Any
 
     def __init__(self):
+        """
+        Initializes the LLMGuardSecretsDetector with a validator.
+        """
         validator = Secrets(redact_mode="all")
         super().__init__(validator=validator)
 
     def scan(self, text: str) -> dict:
+        """
+        Scans the given text for secrets.
+
+        Args:
+            text (str): The text to scan for secrets.
+
+        Returns:
+            dict: A dictionary containing the scan results.
+        """
         sanitized_prompt, is_valid, risk_score = self.validator.scan(text)
         if is_valid:
             return {
@@ -110,6 +158,16 @@ class LLMGuardSecretsDetector(Guardrail):
         return_detected_secrets: bool = True,
         **kwargs,
     ) -> SecretsDetectionResponse | SecretsDetectionResponse:
+        """
+        Guards the given prompt by scanning for secrets.
+
+        Args:
+            prompt (str): The prompt to scan for secrets.
+            return_detected_secrets (bool): Whether to return detected secrets.
+
+        Returns:
+            SecretsDetectionResponse | SecretsDetectionSimpleResponse: The response after scanning for secrets.
+        """
         results = self.scan(prompt)
         if return_detected_secrets:
             return SecretsDetectionResponse(
@@ -129,6 +187,9 @@ class LLMGuardSecretsDetector(Guardrail):
 
 
 def main():
+    """
+    Main function to initialize and evaluate the secrets detectors.
+    """
     client = weave.init("parambharat/secrets-detection")
     dataset = weave.ref("secrets-detection-benchmark:latest").get()
     llm_guard_guardrail = LLMGuardSecretsDetector()

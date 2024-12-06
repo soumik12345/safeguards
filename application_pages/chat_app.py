@@ -29,6 +29,8 @@ def initialize_session_state():
         st.session_state.test_guardrails = False
     if "llm_model" not in st.session_state:
         st.session_state.llm_model = None
+    if "llama_guard_checkpoint_name" not in st.session_state:
+        st.session_state.llama_guard_checkpoint_name = ""
 
 
 def initialize_guardrails():
@@ -88,6 +90,30 @@ def initialize_guardrails():
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
                 )(should_anonymize=True)
+            )
+        elif guardrail_name == "PromptInjectionLlamaGuardrail":
+            llama_guard_checkpoint_name = st.sidebar.text_input(
+                "Checkpoint Name", value=""
+            )
+            st.session_state.llama_guard_checkpoint_name = llama_guard_checkpoint_name
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(
+                    checkpoint=(
+                        None
+                        if st.session_state.llama_guard_checkpoint_name == ""
+                        else st.session_state.llama_guard_checkpoint_name
+                    )
+                )
+            )
+        else:
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )()
             )
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
