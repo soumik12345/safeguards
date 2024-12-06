@@ -24,6 +24,8 @@ class AccuracyMetric(weave.Scorer):
         field in the output dictionary, when converted to an integer, matches
         the provided label.
 
+        The scorer assumes that the dataset labels are 0 for safe and 1 for unsafe.
+
         Args:
             output (dict): A dictionary containing the model's prediction,
                 specifically the 'safe' key which holds the predicted value.
@@ -33,7 +35,7 @@ class AccuracyMetric(weave.Scorer):
             dict: A dictionary with a single key 'correct', which is True if the
           prediction matches the label, otherwise False.
         """
-        return {"correct": label == int(output["safe"])}
+        return {"correct": label != int(output["safe"])}
 
     @weave.op()
     def summarize(self, score_rows: list) -> Optional[dict]:
