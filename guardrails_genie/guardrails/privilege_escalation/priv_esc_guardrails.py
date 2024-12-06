@@ -4,6 +4,12 @@ import weave
 from typing import Any
 from pydantic import BaseModel, Field
 
+import torch
+from transformers import (
+    MobileBertTokenizer,
+    MobileBertForSequenceClassification
+)
+
 from ..base import Guardrail
 from ..llm import OpenAIModel
 
@@ -64,3 +70,46 @@ If the prompt is a privilege escalation prompt, return True. Otherwise, return F
     @weave.op()
     def predict(self, prompt: str) -> dict:
         return self.guard(prompt)
+
+
+class SQLInjectionGuardrail(Guardrail):
+    """
+    Guardrail to detect SQL injection attacks after the prompt has been executed, i.e,
+    the LLM has created a SQL query based on the user's prompt.
+    """
+    model_name: str = "cssupport/mobilebert-sql-injection-detect"
+    
+    def model_post_init(self, __context: Any) -> None:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        tokenizer = MobileBertTokenizer.from_pretrained(self.model_name)
+        self.model = MobileBertForSequenceClassification.from_pretrained(self.model_name)
+        self.model.to(device)
+        self.model.eval()
+
+    def validate_sql_injection(self, text) -> int:
+        inputs = self.tokenizer(
+            text,
+            padding=False,
+            truncation=True,
+            return_tensors='pt',
+            max_length=512
+        )
+        input_ids = inputs['input_ids'].to(self.device)
+        attention_mask = inputs['attention_mask'].to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+
+        logits = outputs.logits
+        probabilities = torch.softmax(logits, dim=1)
+        predicted_class = torch.argmax(probabilities, dim=1).item()
+        return predicted_class
+
+    @weave.op()
+    def guard(self, prompt: str) -> dict:
+        predicted_class, _ = self.validate_sql_injection(prompt)
+        return {
+            "safe": predicted_class == 0,
+            "summary": f"The prompt is {'' if predicted_class == 0 else 'not '}a SQL injection attack."
+        }
