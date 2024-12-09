@@ -3,12 +3,13 @@ import shutil
 from glob import glob
 from typing import Optional
 
+# import torch.optim as optim
+import bitsandbytes.optim as optim
 import plotly.graph_objects as go
 import streamlit as st
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
 from datasets import load_dataset
 from pydantic import BaseModel
 from rich.progress import track
@@ -335,8 +336,8 @@ class LlamaGuardFineTuner:
 
     def train(
         self,
-        batch_size: int = 32,
-        lr: float = 5e-6,
+        batch_size: int = 16,
+        starting_lr: float = 1e-7,
         num_classes: int = 2,
         log_interval: int = 1,
         save_interval: int = 50,
@@ -358,7 +359,7 @@ class LlamaGuardFineTuner:
 
         Args:
             batch_size (int, optional): The number of samples per batch during training.
-            lr (float, optional): The learning rate for the optimizer.
+            starting_lr (float, optional): The starting learning rate for the optimizer.
             num_classes (int, optional): The number of output classes for the classifier.
             log_interval (int, optional): The interval (in batches) at which to log the loss.
             save_interval (int, optional): The interval (in batches) at which to save model checkpoints.
@@ -377,7 +378,7 @@ class LlamaGuardFineTuner:
         wandb.config.dataset_args = self.dataset_args.model_dump()
         wandb.config.model_name = self.model_name
         wandb.config.batch_size = batch_size
-        wandb.config.lr = lr
+        wandb.config.starting_lr = starting_lr
         wandb.config.num_classes = num_classes
         wandb.config.log_interval = log_interval
         wandb.config.save_interval = save_interval
@@ -387,7 +388,16 @@ class LlamaGuardFineTuner:
         self.model.num_labels = num_classes
         self.model = self.model.to(self.device)
         self.model.train()
-        optimizer = optim.AdamW(self.model.parameters(), lr=lr)
+        # optimizer = optim.AdamW(self.model.parameters(), lr=starting_lr)
+        optimizer = optim.Lion(
+            self.model.parameters(), lr=starting_lr, weight_decay=0.01
+        )
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=starting_lr,
+            steps_per_epoch=len(self.train_dataset) // batch_size + 1,
+            epochs=1,
+        )
         data_loader = DataLoader(
             self.train_dataset,
             batch_size=batch_size,
@@ -405,9 +415,14 @@ class LlamaGuardFineTuner:
             loss = outputs.loss
             optimizer.zero_grad()
             loss.backward()
+
+            # torch.nn.utils.clip_grad_norm_(self.model.parameters(), gradient_clipping)
+
             optimizer.step()
+            scheduler.step()
             if (i + 1) % log_interval == 0:
                 wandb.log({"loss": loss.item()}, step=i + 1)
+                wandb.log({"learning_rate": scheduler.get_last_lr()[0]}, step=i + 1)
             if progress_bar:
                 progress_percentage = (i + 1) * 100 // len(data_loader)
                 progress_bar.progress(
