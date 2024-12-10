@@ -55,7 +55,6 @@ def initialize_guardrails():
                 [
                     "",
                     "ProtectAI/deberta-v3-base-prompt-injection-v2",
-                    "wandb://geekyrakshit/guardrails-genie/model-6rwqup9b:v3",
                 ],
             )
             if classifier_model_name != "":
