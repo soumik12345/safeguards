@@ -12,7 +12,8 @@ from guardrails_genie.llm import OpenAIModel
 def initialize_session_state():
     load_dotenv()
     weave.init(project_name=os.getenv("WEAVE_PROJECT"))
-
+    if "weave_project_name" not in st.session_state:
+        st.session_state.weave_project_name = "guardrails-genie"
     if "guardrails" not in st.session_state:
         st.session_state.guardrails = []
     if "guardrail_names" not in st.session_state:
@@ -122,6 +123,13 @@ def initialize_guardrails():
 
 initialize_session_state()
 st.title(":material/robot: Guardrails Genie Playground")
+
+weave_project_name = st.sidebar.text_input(
+    "Weave project name", value=st.session_state.weave_project_name
+)
+st.session_state.weave_project_name = weave_project_name
+if st.session_state.weave_project_name != "":
+    weave.init(project_name=st.session_state.weave_project_name)
 
 openai_model = st.sidebar.selectbox(
     "OpenAI LLM for Chat", ["", "gpt-4o-mini", "gpt-4o"]
