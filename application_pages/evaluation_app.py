@@ -4,7 +4,6 @@ from importlib import import_module
 import pandas as pd
 import streamlit as st
 import weave
-from dotenv import load_dotenv
 
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
@@ -12,7 +11,6 @@ from guardrails_genie.metrics import AccuracyMetric
 
 
 def initialize_session_state():
-    load_dotenv()
     if "uploaded_file" not in st.session_state:
         st.session_state.uploaded_file = None
     if "dataset_name" not in st.session_state:

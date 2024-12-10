@@ -1,14 +1,12 @@
 import importlib
 
 import streamlit as st
-from dotenv import load_dotenv
 
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
 
 
 def initialize_session_state():
-    load_dotenv()
     if "guardrails" not in st.session_state:
         st.session_state.guardrails = []
     if "guardrail_names" not in st.session_state:
