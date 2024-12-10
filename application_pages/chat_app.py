@@ -86,7 +86,8 @@ def initialize_guardrails():
             )
         elif guardrail_name == "PromptInjectionLlamaGuardrail":
             llama_guard_checkpoint_name = st.sidebar.text_input(
-                "Checkpoint Name", value=""
+                "Checkpoint Name",
+                value="wandb://geekyrakshit/guardrails-genie/ruk3f3b4-model:v8",
             )
             st.session_state.llama_guard_checkpoint_name = llama_guard_checkpoint_name
             st.session_state.guardrails.append(
@@ -114,7 +115,9 @@ def initialize_guardrails():
 
 
 if st.session_state.is_authenticated:
-    weave.init(project_name=f"{st.session_state.weave_entity_name}/{st.session_state.weave_project_name}")
+    weave.init(
+        project_name=f"{st.session_state.weave_entity_name}/{st.session_state.weave_project_name}"
+    )
     initialize_session_state()
     st.title(":material/robot: Guardrails Genie Playground")
 
