@@ -1,3 +1,13 @@
+---
+title: Guardrails-Genie
+emoji: 🧞‍♂️
+colorFrom: blue
+colorTo: orange
+sdk: streamlit
+app_file: app.py
+pinned: false
+---
+
 # Guardrails-Genie
 
 Guardrails-Genie is a tool that helps you implement guardrails in your LLM applications.
