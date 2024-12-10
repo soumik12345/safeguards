@@ -1,3 +1,4 @@
+import asyncio
 from importlib import import_module
 
 import pandas as pd
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
+from guardrails_genie.metrics import AccuracyMetric
 
 
 def initialize_session_state():
@@ -31,6 +33,8 @@ def initialize_session_state():
         st.session_state.guardrail_names = []
     if "start_evaluations_button" not in st.session_state:
         st.session_state.start_evaluations_button = False
+    if "evaluation_name" not in st.session_state:
+        st.session_state.evaluation_name = ""
 
 
 def initialize_guardrails():
@@ -185,8 +189,43 @@ if st.session_state.uploaded_file is not None:
         st.session_state.guardrail_names = guardrail_names
 
         initialize_guardrails()
+        evaluation_name = st.sidebar.text_input("Evaluation Name", value="")
+        st.session_state.evaluation_name = evaluation_name
 
         start_evaluations_button = st.sidebar.button("Start Evaluations")
         st.session_state.start_evaluations_button = start_evaluations_button
         if st.session_state.start_evaluations_button:
-            st.write(len(st.session_state.guardrails))
+            # st.write(len(st.session_state.guardrails))
+            evaluation = weave.Evaluation(
+                dataset=st.session_state.dataset_ref,
+                scorers=[AccuracyMetric()],
+                streamlit_mode=True,
+            )
+            with st.expander("Evaluation Results", expanded=True):
+                evaluation_summary, call = asyncio.run(
+                    evaluation.evaluate.call(
+                        evaluation,
+                        GuardrailManager(guardrails=st.session_state.guardrails),
+                        __weave={
+                            "display_name": (
+                                "Evaluation.evaluate"
+                                if st.session_state.evaluation_name == ""
+                                else "Evaluation.evaluate:"
+                                + st.session_state.evaluation_name
+                            )
+                        },
+                    )
+                )
+                x_axis = list(evaluation_summary["AccuracyMetric"].keys())
+                y_axis = [
+                    evaluation_summary["AccuracyMetric"][x_axis_item]
+                    for x_axis_item in x_axis
+                ]
+                st.bar_chart(
+                    pd.DataFrame({"Metric": x_axis, "Score": y_axis}),
+                    x="Metric",
+                    y="Score",
+                )
+                st.markdown(
+                    f"Explore the entire evaluation trace table in [Weave]({call.ui_url})"
+                )
