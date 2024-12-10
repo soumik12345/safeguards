@@ -1,7 +1,7 @@
 import importlib
 
 import streamlit as st
-
+import weave
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.llm import OpenAIModel
 
@@ -114,6 +114,7 @@ def initialize_guardrails():
 
 
 if st.session_state.is_authenticated:
+    weave.init(project_name=f"{st.session_state.weave_entity_name}/{st.session_state.weave_project_name}")
     initialize_session_state()
     st.title(":material/robot: Guardrails Genie Playground")
 

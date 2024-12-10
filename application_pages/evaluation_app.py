@@ -120,6 +120,9 @@ def initialize_guardrails():
 
 
 if st.session_state.is_authenticated:
+    weave.init(
+        project_name=f"{st.session_state.weave_entity_name}/{st.session_state.weave_project_name}"
+    )
     initialize_session_state()
     st.title(":material/monitoring: Evaluation")
 
@@ -187,11 +190,17 @@ if st.session_state.is_authenticated:
             st.session_state.start_evaluations_button = start_evaluations_button
             if st.session_state.start_evaluations_button:
                 # st.write(len(st.session_state.guardrails))
-                evaluation = weave.Evaluation(
-                    dataset=st.session_state.dataset_ref,
-                    scorers=[AccuracyMetric()],
-                    streamlit_mode=True,
-                )
+                try:
+                    evaluation = weave.Evaluation(
+                        dataset=st.session_state.dataset_ref,
+                        scorers=[AccuracyMetric()],
+                        streamlit_mode=True,
+                    )
+                except Exception as e:
+                    evaluation = weave.Evaluation(
+                        dataset=st.session_state.dataset_ref,
+                        scorers=[AccuracyMetric()],
+                    )
                 with st.expander("Evaluation Results", expanded=True):
                     evaluation_summary, call = asyncio.run(
                         evaluation.evaluate.call(
