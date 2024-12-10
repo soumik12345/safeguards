@@ -1,7 +1,7 @@
 import streamlit as st
 
 intro_page = st.Page(
-    "application_pages/intro_page.py", title="Introduction", icon=":material/guardian:"
+    "application_pages/intro_page.py", title="Authenticate", icon=":material/guardian:"
 )
 chat_page = st.Page(
     "application_pages/chat_app.py",
