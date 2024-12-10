@@ -44,7 +44,9 @@ authenticate_button = st.sidebar.button("Authenticate")
 st.session_state.authenticate_button = authenticate_button
 
 if authenticate_button and (
-    st.session_state.wandb_api_key != "" and st.session_state.weave_project_name != ""
+    st.session_state.wandb_api_key != ""
+    and st.session_state.weave_project_name != ""
+    and openai_api_key != ""
 ):
     is_wandb_logged_in = wandb.login(key=st.session_state.wandb_api_key, relogin=True)
     if is_wandb_logged_in:
