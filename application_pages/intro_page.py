@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 
 import wandb
@@ -38,6 +40,9 @@ wandb_api_key = st.sidebar.text_input("Wandb API Key", value="", type="password"
 st.session_state.wandb_api_key = wandb_api_key
 authenticate_button = st.sidebar.button("Authenticate")
 st.session_state.authenticate_button = authenticate_button
+
+openai_api_key = st.sidebar.text_input("OpenAI API Key", value="", type="password")
+os.environ["OPENAI_API_KEY"] = openai_api_key
 
 if authenticate_button and (
     st.session_state.wandb_api_key != "" and st.session_state.weave_project_name != ""

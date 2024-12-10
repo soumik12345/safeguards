@@ -18,11 +18,6 @@ source .venv/bin/activate
 ## Run the App
 
 ```bash
-export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
-export WEAVE_PROJECT="YOUR_WEAVE_PROJECT"
-export WANDB_PROJECT_NAME="YOUR_WANDB_PROJECT_NAME"
-export WANDB_ENTITY_NAME="YOUR_WANDB_ENTITY_NAME"
-export WANDB_LOG_MODEL="checkpoint"
 streamlit run app.py
 ```
 
