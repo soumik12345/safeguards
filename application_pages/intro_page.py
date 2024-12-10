@@ -22,7 +22,11 @@ initialize_session_state()
 st.title("🧞‍♂️ Guardrails Genie")
 
 st.write(
-    "Guardrails-Genie is a tool that helps you implement guardrails in your LLM applications."
+    """
+Guardrails-Genie is a tool that helps you implement guardrails in your LLM applications.
+
+Learn more about Guardrails-Genie at [**geekyrakshit.dev/guardrails-genie**](https://geekyrakshit.dev/guardrails-genie/)
+"""
 )
 
 st.sidebar.markdown(
