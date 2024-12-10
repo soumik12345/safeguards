@@ -23,32 +23,28 @@ st.write(
     "Guardrails-Genie is a tool that helps you implement guardrails in your LLM applications."
 )
 
-with st.expander("Login to Your WandB Account", expanded=True):
-    st.markdown(
-        "Get your Wandb API key from [https://wandb.ai/authorize](https://wandb.ai/authorize)"
-    )
-    weave_entity_name = st.text_input(
-        "Weave Entity Name", value=st.session_state.weave_entity_name
-    )
-    st.session_state.weave_entity_name = weave_entity_name
-    weave_project_name = st.text_input(
-        "Weave Project Name", value=st.session_state.weave_project_name
-    )
-    st.session_state.weave_project_name = weave_project_name
-    wandb_api_key = st.text_input("Wandb API Key", value="", type="password")
-    st.session_state.wandb_api_key = wandb_api_key
-    authenticate_button = st.button("Authenticate")
-    st.session_state.authenticate_button = authenticate_button
+st.sidebar.markdown(
+    "Get your Wandb API key from [https://wandb.ai/authorize](https://wandb.ai/authorize)"
+)
+weave_entity_name = st.sidebar.text_input(
+    "Weave Entity Name", value=st.session_state.weave_entity_name
+)
+st.session_state.weave_entity_name = weave_entity_name
+weave_project_name = st.sidebar.text_input(
+    "Weave Project Name", value=st.session_state.weave_project_name
+)
+st.session_state.weave_project_name = weave_project_name
+wandb_api_key = st.sidebar.text_input("Wandb API Key", value="", type="password")
+st.session_state.wandb_api_key = wandb_api_key
+authenticate_button = st.sidebar.button("Authenticate")
+st.session_state.authenticate_button = authenticate_button
 
-    if authenticate_button and (
-        st.session_state.wandb_api_key != ""
-        and st.session_state.weave_project_name != ""
-    ):
-        is_wandb_logged_in = wandb.login(
-            key=st.session_state.wandb_api_key, relogin=True
-        )
-        if is_wandb_logged_in:
-            st.session_state.is_authenticated = True
-            st.success("Logged in to Wandb")
-        else:
-            st.error("Failed to log in to Wandb")
+if authenticate_button and (
+    st.session_state.wandb_api_key != "" and st.session_state.weave_project_name != ""
+):
+    is_wandb_logged_in = wandb.login(key=st.session_state.wandb_api_key, relogin=True)
+    if is_wandb_logged_in:
+        st.session_state.is_authenticated = True
+        st.success("Logged in to Wandb")
+    else:
+        st.error("Failed to log in to Wandb")
