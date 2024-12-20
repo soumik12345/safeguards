@@ -153,7 +153,7 @@ def initialize_guardrails_on_playground():
 
     The function iterates over each guardrail name in 'st.session_state.guardrail_names'
     and performs the following actions based on the guardrail type:
-    
+
     - For "PromptInjectionLLMGuardrail", it allows the user to select a language model
       from a dropdown and initializes the guardrail with the selected model.
     - For "PromptInjectionClassifierGuardrail", it initializes the guardrail with a

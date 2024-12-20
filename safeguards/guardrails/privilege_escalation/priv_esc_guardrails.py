@@ -44,6 +44,7 @@ class OpenAIPrivilegeEscalationGuardrail(Guardrail):
         predict(prompt: str) -> dict:
             A wrapper around the guard method to provide a consistent interface.
     """
+
     llm_model: OpenAIModel
 
     @weave.op()
@@ -129,6 +130,7 @@ class SQLInjectionGuardrail(Guardrail):
             A wrapper around the guard method to provide a consistent interface
             for evaluating prompts.
     """
+
     model_name: str = "cssupport/mobilebert-sql-injection-detect"
 
     def model_post_init(self, __context: Any) -> None:
