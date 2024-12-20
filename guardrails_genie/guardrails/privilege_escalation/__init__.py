@@ -1,5 +1,3 @@
-from guardrails_genie.guardrails.privilege_escalation.priv_esc_guardrails import (
-    PrivilegeEscalationGuardrail,
-)
+from .priv_esc_guardrails import OpenAIPrivilegeEscalationGuardrail
 
-__all__ = ["PrivilegeEscalationGuardrail"]
+__all__ = ["OpenAIPrivilegeEscalationGuardrail"]

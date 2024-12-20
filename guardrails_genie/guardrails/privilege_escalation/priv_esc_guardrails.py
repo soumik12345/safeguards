@@ -11,7 +11,7 @@ from transformers import (
 )
 
 from ..base import Guardrail
-from ..llm import OpenAIModel
+from ...llm import OpenAIModel
 
     
 class OpenAIPrivEscResponse(BaseModel):

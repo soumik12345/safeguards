@@ -13,7 +13,7 @@ from guardrails_genie.guardrails.injection import (
     PromptInjectionSurveyGuardrail,
 )
 from guardrails_genie.guardrails.secrets_detection import SecretsDetectionGuardrail
-from guardrails_genie.guardrails.privilege_escalation import PrivilegeEscalationGuardrail
+from guardrails_genie.guardrails.privilege_escalation import OpenAIPrivilegeEscalationGuardrail
 
 from .manager import GuardrailManager
 
@@ -27,5 +27,5 @@ __all__ = [
     "RestrictedTermsJudge",
     "GuardrailManager",
     "SecretsDetectionGuardrail",
-    "PrivilegeEscalationGuardrail",
+    "OpenAIPrivilegeEscalationGuardrail",
 ]
