@@ -6,6 +6,7 @@ on:
       - guardrails_genie/**
       - pyproject.toml
       - tests/**
+
 jobs:
   lint:
     name: check linting using ruff
@@ -54,13 +55,13 @@ jobs:
   test-prompt-injection-classifier:
     name: test prompt injection classifier guardrail
     runs-on: ubuntu-latest
-    # env:
-    #   HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - run: |
           pip install -U pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          # huggingface-cli login --token ${{ HF_TOKEN }}
           pip install -e ".[dev]"
+          huggingface-cli login --token ${{ secrets.HF_TOKEN }}
           python -m pytest -s tests/test_prompt_injection_classifier.py
