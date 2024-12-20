@@ -28,6 +28,8 @@ jobs:
   test-privilege-escalation:
     name: test privilege escalation
     runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - run: |
