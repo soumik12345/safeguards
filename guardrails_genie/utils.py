@@ -1,7 +1,6 @@
 import importlib
 
 import pandas as pd
-import rich
 import streamlit as st
 import weave
 from dotenv import load_dotenv
@@ -226,7 +225,6 @@ def initialize_guardrails_on_playground():
                     guardrail_name,
                 )()
             )
-    rich.print(f"{st.session_state.guardrails=}")
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
     )
