@@ -6,26 +6,29 @@ import weave
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 from transformers.pipelines.base import Pipeline
 
-from ..base import Guardrail
+from ...base import Guardrail
 
 
-class PromptInjectionClassifierGuardrail(Guardrail):
+class PromptInjectionHuggingFaceClassifierGuardrail(Guardrail):
     """
     A guardrail that uses a pre-trained text-classification model to classify prompts
     for potential injection attacks.
 
     Args:
-        model_name (str): The name of the HuggingFace model or a WandB
-            checkpoint artifact path to use for classification.
+        model_name (str): The name of the HuggingFace model to use for prompt
+            injection classification.
+        checkpoint (Optional[str]): The address of the checkpoint to use for
+            the model.
     """
 
     model_name: str = "ProtectAI/deberta-v3-base-prompt-injection-v2"
+    checkpoint: Optional[str] = None
     _classifier: Optional[Pipeline] = None
 
     def model_post_init(self, __context):
-        if self.model_name.startswith("wandb://"):
+        if self.checkpoint is not None:
             api = wandb.Api()
-            artifact = api.artifact(self.model_name.removeprefix("wandb://"))
+            artifact = api.artifact(self.checkpoint.removeprefix("wandb://"))
             artifact_dir = artifact.download()
             tokenizer = AutoTokenizer.from_pretrained(artifact_dir)
             model = AutoModelForSequenceClassification.from_pretrained(artifact_dir)

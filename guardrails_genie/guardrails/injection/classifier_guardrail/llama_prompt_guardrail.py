@@ -10,7 +10,7 @@ import weave
 from safetensors.torch import load_model
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from ..base import Guardrail
+from ...base import Guardrail
 
 
 class PromptInjectionLlamaGuardrail(Guardrail):
@@ -29,7 +29,7 @@ class PromptInjectionLlamaGuardrail(Guardrail):
         guardrail_manager = GuardrailManager(
             guardrails=[
                 PromptInjectionLlamaGuardrail(
-                    checkpoint="wandb://geekyrakshit/guardrails-genie/ruk3f3b4-model:v0"
+                    checkpoint="wandb://geekyrakshit/guardrails-genie/ruk3f3b4-model:v8"
                 )
             ]
         )

@@ -11,7 +11,6 @@ from guardrails_genie.guardrails.entity_recognition import (
 )
 from guardrails_genie.guardrails.injection import (
     PromptInjectionClassifierGuardrail,
-    PromptInjectionLlamaGuardrail,
     PromptInjectionLLMGuardrail,
 )
 from guardrails_genie.guardrails.privilege_escalation import (
@@ -22,9 +21,8 @@ from guardrails_genie.guardrails.secrets_detection import SecretsDetectionGuardr
 from .manager import GuardrailManager
 
 __all__ = [
-    "PromptInjectionLlamaGuardrail",
-    "PromptInjectionLLMGuardrail",
     "PromptInjectionClassifierGuardrail",
+    "PromptInjectionLLMGuardrail",
     "PresidioEntityRecognitionGuardrail",
     "RegexEntityRecognitionGuardrail",
     "TransformersEntityRecognitionGuardrail",
