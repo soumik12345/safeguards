@@ -56,10 +56,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - run: |
           pip install -U pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
+          huggingface-cli login --token ${{ HF_TOKEN }}
           pip install -e ".[dev]"
           python -m pytest -s tests/test_prompt_injection_classifier.py
