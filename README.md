@@ -5,13 +5,7 @@ Safeguards is a tool that helps you implement guardrails in your LLM application
 ## Installation
 
 ```bash
-git clone https://github.com/soumik12345/guardrails-genie
-cd guardrails-genie
-pip install -u pip uv
-uv venv
-uv pip install torch --index-url https://download.pytorch.org/whl/cpu
-uv pip install -e .
-source .venv/bin/activate
+uv pip install git+https://github.com/soumik12345/safeguards
 ```
 
 ## Run the App
@@ -27,14 +21,14 @@ Validate your prompt with guardrails:
 ```python
 import weave
 
-from guardrails_genie.guardrails import (
+from safeguards.guardrails import (
     GuardrailManager,
     PromptInjectionProtectAIGuardrail,
     PromptInjectionSurveyGuardrail,
 )
-from guardrails_genie.llm import OpenAIModel
+from safeguards.llm import OpenAIModel
 
-weave.init(project_name="geekyrakshit/guardrails-genie")
+weave.init(project_name="safeguards")
 
 manager = GuardrailManager(
     guardrails=[
