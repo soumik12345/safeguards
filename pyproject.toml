@@ -1,5 +1,5 @@
 [project]
-name = "guardrails-genie"
+name = "safeguards"
 version = "0.0.1"
 description = ""
 readme = "README.md"
@@ -41,7 +41,9 @@ dev = [
     "black>=24.10.0",
     "ruff>=0.6.9",
     "pip>=24.2",
-    "uv>=0.4.20",
+    "uv>=0.5.11",
+    "pytest>=8.3.4",
+    "hypothesis>=6.122.5",
 ]
 docs = [
     "mkdocs>=1.6.1",
@@ -62,4 +64,9 @@ test = [
 ]
 
 [tool.setuptools]
-py-modules = ["guardrails_genie"]
+py-modules = ["safeguards"]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["tests"]
+filterwarnings = "ignore::DeprecationWarning"

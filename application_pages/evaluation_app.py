@@ -5,9 +5,9 @@ import pandas as pd
 import streamlit as st
 import weave
 
-from guardrails_genie.guardrails import GuardrailManager
-from guardrails_genie.llm import OpenAIModel
-from guardrails_genie.metrics import AccuracyMetric
+from safeguards.guardrails import GuardrailManager
+from safeguards.llm import OpenAIModel
+from safeguards.metrics import AccuracyMetric
 
 
 def initialize_session_state():
@@ -196,7 +196,7 @@ if st.session_state.is_authenticated:
                         scorers=[AccuracyMetric()],
                         streamlit_mode=True,
                     )
-                except Exception as e:
+                except Exception:
                     evaluation = weave.Evaluation(
                         dataset=st.session_state.dataset_ref,
                         scorers=[AccuracyMetric()],
