@@ -1,6 +1,6 @@
-# Guardrails-Genie
+# Safeguards
 
-Guardrails-Genie is a tool that helps you implement guardrails in your LLM applications.
+Safeguards is a tool that helps you implement guardrails in your LLM applications.
 
 ## Installation
 

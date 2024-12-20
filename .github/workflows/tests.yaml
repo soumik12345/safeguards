@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/tests.yml
-      - guardrails_genie/**
+      - safeguards/**
       - pyproject.toml
       - tests/**
 

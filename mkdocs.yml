@@ -1,5 +1,5 @@
 # mkdocs.yml
-site_name: Guardrails Genie
+site_name: Safeguards
 
 theme:
   name: material
