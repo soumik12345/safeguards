@@ -65,3 +65,8 @@ test = [
 
 [tool.setuptools]
 py-modules = ["guardrails_genie"]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["tests"]
+filterwarnings = "ignore::DeprecationWarning"
