@@ -1,3 +1,3 @@
 # Utils
 
-::: guardrails_genie.utils
+::: safeguards.utils

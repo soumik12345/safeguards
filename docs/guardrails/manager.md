@@ -1,3 +1,4 @@
 # Guardrail Manager
 
-::: guardrails_genie.guardrails.manager
+::: safeguards.guardrails.manager
+

@@ -1,3 +1,4 @@
 # Metrics
 
-::: guardrails_genie.metrics
+::: safeguards.metrics
+

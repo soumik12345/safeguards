@@ -1,3 +1,3 @@
 # Privilege Escalation Guardrail
 
-::: guardrails_genie.guardrails.privilege_escalation.priv_esc_guardrails
+::: safeguards.guardrails.privilege_escalation.priv_esc_guardrails

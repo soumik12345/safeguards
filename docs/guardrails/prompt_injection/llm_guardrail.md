@@ -1,3 +1,3 @@
 # LLM Guardrail
 
-::: guardrails_genie.guardrails.injection.llm_guardrail
+::: safeguards.guardrails.injection.llm_guardrail
