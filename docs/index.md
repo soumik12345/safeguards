@@ -45,8 +45,9 @@ import weave
 
 from safeguards.guardrails import (
     GuardrailManager,
-    PromptInjectionProtectAIGuardrail,
-    PromptInjectionSurveyGuardrail,
+    PromptInjectionClassifierGuardrail,
+    PromptInjectionLLMGuardrail,
+    OpenAIPrivilegeEscalationGuardrail,
 )
 from safeguards.llm import OpenAIModel
 
@@ -54,8 +55,11 @@ weave.init(project_name="safeguards")
 
 manager = GuardrailManager(
     guardrails=[
-        PromptInjectionSurveyGuardrail(llm_model=OpenAIModel(model_name="gpt-4o")),
-        PromptInjectionProtectAIGuardrail(),
+        PromptInjectionLLMGuardrail(llm_model=OpenAIModel(model_name="gpt-4o")),
+        PromptInjectionClassifierGuardrail(
+            model_name="ProtectAI/deberta-v3-base-prompt-injection-v2"
+        ),
+        OpenAIPrivilegeEscalationGuardrail(llm_model=OpenAIModel(model_name="gpt-4o")),
     ]
 )
 manager.guard(
