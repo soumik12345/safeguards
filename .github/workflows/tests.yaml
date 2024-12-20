@@ -26,7 +26,7 @@ jobs:
   #         python -m pytest -s tests/test_secrets_detection.py
   
   test-privilege-escalation:
-    name: test privilege escalation
+    name: test privilege escalation guardrail
     runs-on: ubuntu-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -37,3 +37,15 @@ jobs:
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -e ".[dev]"
           python -m pytest -s tests/test_privilege_escalation.py
+
+  test-prompt-injection-llm:
+    name: test prompt injection llm guardrail
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip install -U pip
+          pip install -e ".[dev]"
+          python -m pytest -s tests/test_prompt_injection_llm.py
