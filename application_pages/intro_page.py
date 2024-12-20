@@ -63,6 +63,6 @@ if authenticate_button and (
     is_wandb_logged_in = wandb.login(key=st.session_state.wandb_api_key, relogin=True)
     if is_wandb_logged_in:
         st.session_state.is_authenticated = True
-        st.success("Logged in to Wandb")
+        st.sidebar.success("Logged in to Wandb")
     else:
-        st.error("Failed to log in to Wandb")
+        st.sidebar.error("Failed to log in to Wandb")

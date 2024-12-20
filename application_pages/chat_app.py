@@ -62,7 +62,7 @@ if st.session_state.is_authenticated:
         options=[
             cls_name
             for cls_name, cls_obj in vars(
-                importlib.import_module("guardrails_genie.guardrails")
+                importlib.import_module("safeguards.guardrails")
             ).items()
             if isinstance(cls_obj, type) and cls_name != "GuardrailManager"
         ],

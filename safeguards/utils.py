@@ -181,7 +181,7 @@ def initialize_guardrails_on_playground():
             st.session_state.prompt_injection_llm_model = prompt_injection_llm_model
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     llm_model=OpenAIModel(
@@ -192,7 +192,7 @@ def initialize_guardrails_on_playground():
         elif guardrail_name == "PromptInjectionClassifierGuardrail":
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(model_name="ProtectAI/deberta-v3-base-prompt-injection-v2")
             )
@@ -206,7 +206,7 @@ def initialize_guardrails_on_playground():
             )
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     checkpoint=(
@@ -228,7 +228,7 @@ def initialize_guardrails_on_playground():
             )
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     should_anonymize=st.session_state.presidio_entity_recognition_guardrail_should_anonymize
@@ -243,7 +243,7 @@ def initialize_guardrails_on_playground():
             )
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     should_anonymize=st.session_state.regex_entity_recognition_guardrail_should_anonymize
@@ -260,7 +260,7 @@ def initialize_guardrails_on_playground():
             )
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     should_anonymize=st.session_state.transformers_entity_recognition_guardrail_should_anonymize
@@ -275,7 +275,7 @@ def initialize_guardrails_on_playground():
             )
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     should_anonymize=st.session_state.restricted_terms_judge_should_anonymize
@@ -284,7 +284,7 @@ def initialize_guardrails_on_playground():
         else:
             st.session_state.guardrails.append(
                 getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
+                    importlib.import_module("safeguards.guardrails"),
                     guardrail_name,
                 )()
             )

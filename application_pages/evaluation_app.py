@@ -43,7 +43,7 @@ def initialize_guardrails():
             if survey_guardrail_model:
                 st.session_state.guardrails.append(
                     getattr(
-                        import_module("guardrails_genie.guardrails"),
+                        import_module("safeguards.guardrails"),
                         guardrail_name,
                     )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
                 )
@@ -58,35 +58,35 @@ def initialize_guardrails():
             if classifier_model_name != "":
                 st.session_state.guardrails.append(
                     getattr(
-                        import_module("guardrails_genie.guardrails"),
+                        import_module("safeguards.guardrails"),
                         guardrail_name,
                     )(model_name=classifier_model_name)
                 )
         elif guardrail_name == "PresidioEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
                 getattr(
-                    import_module("guardrails_genie.guardrails"),
+                    import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(should_anonymize=True)
             )
         elif guardrail_name == "RegexEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
                 getattr(
-                    import_module("guardrails_genie.guardrails"),
+                    import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(should_anonymize=True)
             )
         elif guardrail_name == "TransformersEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
                 getattr(
-                    import_module("guardrails_genie.guardrails"),
+                    import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(should_anonymize=True)
             )
         elif guardrail_name == "RestrictedTermsJudge":
             st.session_state.guardrails.append(
                 getattr(
-                    import_module("guardrails_genie.guardrails"),
+                    import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(should_anonymize=True)
             )
@@ -97,7 +97,7 @@ def initialize_guardrails():
             st.session_state.llama_guard_checkpoint_name = llama_guard_checkpoint_name
             st.session_state.guardrails.append(
                 getattr(
-                    import_module("guardrails_genie.guardrails"),
+                    import_module("safeguards.guardrails"),
                     guardrail_name,
                 )(
                     checkpoint=(
@@ -110,7 +110,7 @@ def initialize_guardrails():
         else:
             st.session_state.guardrails.append(
                 getattr(
-                    import_module("guardrails_genie.guardrails"),
+                    import_module("safeguards.guardrails"),
                     guardrail_name,
                 )()
             )
@@ -175,7 +175,7 @@ if st.session_state.is_authenticated:
                 options=[
                     cls_name
                     for cls_name, cls_obj in vars(
-                        import_module("guardrails_genie.guardrails")
+                        import_module("safeguards.guardrails")
                     ).items()
                     if isinstance(cls_obj, type) and cls_name != "GuardrailManager"
                 ],
