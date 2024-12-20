@@ -145,6 +145,33 @@ class StreamlitProgressbarCallback(TrainerCallback):
 
 
 def initialize_guardrails_on_playground():
+    """
+    Initializes guardrails for the Streamlit application based on the user's selection
+    from the sidebar. This function dynamically imports and configures various guardrail
+    classes from the 'guardrails_genie.guardrails' module, depending on the guardrail
+    names specified in the Streamlit session state.
+
+    The function iterates over each guardrail name in 'st.session_state.guardrail_names'
+    and performs the following actions based on the guardrail type:
+    
+    - For "PromptInjectionLLMGuardrail", it allows the user to select a language model
+      from a dropdown and initializes the guardrail with the selected model.
+    - For "PromptInjectionClassifierGuardrail", it initializes the guardrail with a
+      predefined model name.
+    - For "PromptInjectionLlamaGuardrail", it takes a checkpoint name input from the user
+      and initializes the guardrail with the specified checkpoint.
+    - For entity recognition guardrails like "PresidioEntityRecognitionGuardrail",
+      "RegexEntityRecognitionGuardrail", and "TransformersEntityRecognitionGuardrail",
+      it provides a checkbox for the user to decide whether to anonymize entities and
+      initializes the guardrail accordingly.
+    - For "RestrictedTermsJudge", it provides a checkbox for anonymization and initializes
+      the guardrail based on the user's choice.
+    - For any other guardrail names, it initializes the guardrail with default settings.
+
+    After initializing all guardrails, it creates a 'GuardrailManager' instance with the
+    configured guardrails and stores it in the session state for further use in the
+    application.
+    """
     st.session_state.guardrails = []
     for guardrail_name in st.session_state.guardrail_names:
         if guardrail_name == "PromptInjectionLLMGuardrail":
