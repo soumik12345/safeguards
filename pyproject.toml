@@ -22,6 +22,7 @@ dependencies = [
     "plotly>=5.24.1",
     "scikit-learn>=1.5.2",
     "sqlparse>=0.5.2",
+    "hypothesis>=6.122.5",
 ]
 
 [project.optional-dependencies]
@@ -41,7 +42,7 @@ dev = [
     "black>=24.10.0",
     "ruff>=0.6.9",
     "pip>=24.2",
-    "uv>=0.4.20",
+    "uv>=0.5.11",
 ]
 docs = [
     "mkdocs>=1.6.1",
