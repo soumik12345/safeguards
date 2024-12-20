@@ -191,32 +191,68 @@ def initialize_guardrails_on_playground():
                 )
             )
         elif guardrail_name == "PresidioEntityRecognitionGuardrail":
+            presidio_entity_recognition_guardrail_should_anonymize = (
+                st.sidebar.checkbox(
+                    "Presidio Entity Recognition Guardrail: Anonymize", value=True
+                )
+            )
+            st.session_state.presidio_entity_recognition_guardrail_should_anonymize = (
+                presidio_entity_recognition_guardrail_should_anonymize
+            )
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )(should_anonymize=True)
+                )(
+                    should_anonymize=st.session_state.presidio_entity_recognition_guardrail_should_anonymize
+                )
             )
         elif guardrail_name == "RegexEntityRecognitionGuardrail":
+            regex_entity_recognition_guardrail_should_anonymize = st.sidebar.checkbox(
+                "Regex Entity Recognition Guardrail: Anonymize", value=True
+            )
+            st.session_state.regex_entity_recognition_guardrail_should_anonymize = (
+                regex_entity_recognition_guardrail_should_anonymize
+            )
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )(should_anonymize=True)
+                )(
+                    should_anonymize=st.session_state.regex_entity_recognition_guardrail_should_anonymize
+                )
             )
         elif guardrail_name == "TransformersEntityRecognitionGuardrail":
+            transformers_entity_recognition_guardrail_should_anonymize = (
+                st.sidebar.checkbox(
+                    "Transformers Entity Recognition Guardrail: Anonymize", value=True
+                )
+            )
+            st.session_state.transformers_entity_recognition_guardrail_should_anonymize = (
+                transformers_entity_recognition_guardrail_should_anonymize
+            )
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )(should_anonymize=True)
+                )(
+                    should_anonymize=st.session_state.transformers_entity_recognition_guardrail_should_anonymize
+                )
             )
         elif guardrail_name == "RestrictedTermsJudge":
+            restricted_terms_judge_should_anonymize = st.sidebar.checkbox(
+                "Restricted Terms Judge: Anonymize", value=True
+            )
+            st.session_state.restricted_terms_judge_should_anonymize = (
+                restricted_terms_judge_should_anonymize
+            )
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )(should_anonymize=True)
+                )(
+                    should_anonymize=st.session_state.restricted_terms_judge_should_anonymize
+                )
             )
         else:
             st.session_state.guardrails.append(

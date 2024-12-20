@@ -193,7 +193,7 @@ if st.session_state.is_authenticated:
                         scorers=[AccuracyMetric()],
                         streamlit_mode=True,
                     )
-                except Exception as e:
+                except Exception:
                     evaluation = weave.Evaluation(
                         dataset=st.session_state.dataset_ref,
                         scorers=[AccuracyMetric()],

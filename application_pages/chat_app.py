@@ -32,6 +32,19 @@ def initialize_session_state():
         st.session_state.prompt_injection_llm_model = None
     if "prompt_injection_llama_guard_checkpoint_name" not in st.session_state:
         st.session_state.prompt_injection_llama_guard_checkpoint_name = None
+    if "presidio_entity_recognition_guardrail_should_anonymize" not in st.session_state:
+        st.session_state.presidio_entity_recognition_guardrail_should_anonymize = True
+    if "regex_entity_recognition_guardrail_should_anonymize" not in st.session_state:
+        st.session_state.regex_entity_recognition_guardrail_should_anonymize = True
+    if (
+        "transformers_entity_recognition_guardrail_should_anonymize"
+        not in st.session_state
+    ):
+        st.session_state.transformers_entity_recognition_guardrail_should_anonymize = (
+            True
+        )
+    if "restricted_terms_judge_should_anonymize" not in st.session_state:
+        st.session_state.restricted_terms_judge_should_anonymize = True
 
 
 weave.init(project_name="guardrails_genie")
