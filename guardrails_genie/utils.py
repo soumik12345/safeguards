@@ -1,3 +1,5 @@
+import importlib
+
 import pandas as pd
 import streamlit as st
 import weave
@@ -7,6 +9,9 @@ from transformers.trainer_callback import (
     TrainerState,
     TrainingArguments,
 )
+
+from .guardrails import GuardrailManager
+from .llm import OpenAIModel
 
 
 class EvaluationCallManager:
@@ -134,3 +139,90 @@ class StreamlitProgressbarCallback(TrainerCallback):
             (state.global_step * 100 // state.max_steps) + 1,
             text=f"Training {state.global_step} / {state.max_steps}",
         )
+
+
+def initialize_guardrails_on_playground():
+    st.session_state.guardrail_names = []
+    for guardrail_name in st.session_state.guardrail_names:
+        if guardrail_name == "PromptInjectionSurveyGuardrail":
+            survey_guardrail_model = st.sidebar.selectbox(
+                "Survey Guardrail LLM", ["", "gpt-4o-mini", "gpt-4o"]
+            )
+            if survey_guardrail_model:
+                st.session_state.guardrails.append(
+                    getattr(
+                        importlib.import_module("guardrails_genie.guardrails"),
+                        guardrail_name,
+                    )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
+                )
+        elif guardrail_name == "PromptInjectionClassifierGuardrail":
+            classifier_model_name = st.sidebar.selectbox(
+                "Classifier Guardrail Model",
+                [
+                    "",
+                    "ProtectAI/deberta-v3-base-prompt-injection-v2",
+                ],
+            )
+            if classifier_model_name != "":
+                st.session_state.guardrails.append(
+                    getattr(
+                        importlib.import_module("guardrails_genie.guardrails"),
+                        guardrail_name,
+                    )(model_name=classifier_model_name)
+                )
+        elif guardrail_name == "PresidioEntityRecognitionGuardrail":
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(should_anonymize=True)
+            )
+        elif guardrail_name == "RegexEntityRecognitionGuardrail":
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(should_anonymize=True)
+            )
+        elif guardrail_name == "TransformersEntityRecognitionGuardrail":
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(should_anonymize=True)
+            )
+        elif guardrail_name == "RestrictedTermsJudge":
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(should_anonymize=True)
+            )
+        elif guardrail_name == "PromptInjectionLlamaGuardrail":
+            llama_guard_checkpoint_name = st.sidebar.text_input(
+                "Checkpoint Name",
+                value="wandb://geekyrakshit/guardrails-genie/ruk3f3b4-model:v8",
+            )
+            st.session_state.llama_guard_checkpoint_name = llama_guard_checkpoint_name
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(
+                    checkpoint=(
+                        None
+                        if st.session_state.llama_guard_checkpoint_name == ""
+                        else st.session_state.llama_guard_checkpoint_name
+                    )
+                )
+            )
+        else:
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )()
+            )
+    st.session_state.guardrails_manager = GuardrailManager(
+        guardrails=st.session_state.guardrails
+    )
