@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 import weave
-from openai import OpenAI, AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
 from openai.types.chat import ChatCompletion
 
 
@@ -102,7 +102,7 @@ class OpenAIModel(weave.Model):
                 model=self.model_name, messages=messages, **kwargs
             )
         return response
-    
+
 
 class AsyncOpenAIModel(weave.Model):
     """

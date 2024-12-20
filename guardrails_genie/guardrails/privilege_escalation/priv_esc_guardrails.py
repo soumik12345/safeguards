@@ -1,26 +1,27 @@
-from typing import Optional
-
-import weave
-from typing import Any
-from pydantic import BaseModel, Field
+from typing import Any, Optional
 
 import torch
-from transformers import (
-    MobileBertTokenizer,
-    MobileBertForSequenceClassification
-)
+import weave
+from pydantic import BaseModel, Field
+from transformers import MobileBertForSequenceClassification, MobileBertTokenizer
 
-from ..base import Guardrail
 from ...llm import OpenAIModel
+from ..base import Guardrail
 
-    
+
 class OpenAIPrivEscResponse(BaseModel):
-    is_priv_esc: bool = Field(..., description="Whether the prompt is a privilege escalation prompt or not. True if it is, False otherwise.")
-    reason: str = Field(..., description="Reasoning for why the prompt is a privilege escalation prompt or not.")
+    is_priv_esc: bool = Field(
+        ...,
+        description="Whether the prompt is a privilege escalation prompt or not. True if it is, False otherwise.",
+    )
+    reason: str = Field(
+        ...,
+        description="Reasoning for why the prompt is a privilege escalation prompt or not.",
+    )
 
 
 class OpenAIPrivilegeEscalationGuardrail(Guardrail):
-    llm_model: Any =  Field(None)
+    llm_model: Any = Field(None)
     model_name: str = "gpt-4o"
     system_prompt: str = """
 You are provided with a prompt and you are tasked with determining if the prompt can be categorized as a privilege escalation prompt. 
@@ -50,6 +51,7 @@ If the prompt is a privilege escalation prompt, return True. Otherwise, return F
 {prompt}
 </prompt>
 """
+
     def model_post_init(self, __context: Any) -> None:
         self.llm_model = OpenAIModel(model_name=self.model_name)
 
@@ -66,7 +68,7 @@ If the prompt is a privilege escalation prompt, return True. Otherwise, return F
             "safe": not response.is_priv_esc,
             "summary": response.reason,
         }
-    
+
     @weave.op()
     def predict(self, prompt: str) -> dict:
         return self.guard(prompt)
@@ -77,26 +79,25 @@ class SQLInjectionGuardrail(Guardrail):
     Guardrail to detect SQL injection attacks after the prompt has been executed, i.e,
     the LLM has created a SQL query based on the user's prompt.
     """
+
     model_name: str = "cssupport/mobilebert-sql-injection-detect"
-    
+
     def model_post_init(self, __context: Any) -> None:
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         tokenizer = MobileBertTokenizer.from_pretrained(self.model_name)
-        self.model = MobileBertForSequenceClassification.from_pretrained(self.model_name)
+        self.model = MobileBertForSequenceClassification.from_pretrained(
+            self.model_name
+        )
         self.model.to(device)
         self.model.eval()
 
     def validate_sql_injection(self, text) -> int:
         inputs = self.tokenizer(
-            text,
-            padding=False,
-            truncation=True,
-            return_tensors='pt',
-            max_length=512
+            text, padding=False, truncation=True, return_tensors="pt", max_length=512
         )
-        input_ids = inputs['input_ids'].to(self.device)
-        attention_mask = inputs['attention_mask'].to(self.device)
+        input_ids = inputs["input_ids"].to(self.device)
+        attention_mask = inputs["attention_mask"].to(self.device)
 
         with torch.no_grad():
             outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
@@ -111,9 +112,9 @@ class SQLInjectionGuardrail(Guardrail):
         predicted_class, _ = self.validate_sql_injection(prompt)
         return {
             "safe": predicted_class == 0,
-            "summary": f"The prompt is {'' if predicted_class == 0 else 'not '}a SQL injection attack."
+            "summary": f"The prompt is {'' if predicted_class == 0 else 'not '}a SQL injection attack.",
         }
-    
+
     @weave.op()
     def predict(self, prompt: str) -> dict:
         return self.guard(prompt)

@@ -1,8 +1,10 @@
 import importlib
 
 import pandas as pd
+import rich
 import streamlit as st
 import weave
+from dotenv import load_dotenv
 from transformers.trainer_callback import (
     TrainerCallback,
     TrainerControl,
@@ -12,6 +14,8 @@ from transformers.trainer_callback import (
 
 from .guardrails import GuardrailManager
 from .llm import OpenAIModel
+
+load_dotenv()
 
 
 class EvaluationCallManager:
@@ -142,34 +146,22 @@ class StreamlitProgressbarCallback(TrainerCallback):
 
 
 def initialize_guardrails_on_playground():
-    st.session_state.guardrail_names = []
+    st.session_state.guardrails = []
     for guardrail_name in st.session_state.guardrail_names:
-        if guardrail_name == "PromptInjectionSurveyGuardrail":
-            survey_guardrail_model = st.sidebar.selectbox(
-                "Survey Guardrail LLM", ["", "gpt-4o-mini", "gpt-4o"]
+        if guardrail_name == "PromptInjectionLLMGuardrail":
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(llm_model=OpenAIModel(model_name="gpt-4o-mini"))
             )
-            if survey_guardrail_model:
-                st.session_state.guardrails.append(
-                    getattr(
-                        importlib.import_module("guardrails_genie.guardrails"),
-                        guardrail_name,
-                    )(llm_model=OpenAIModel(model_name=survey_guardrail_model))
-                )
         elif guardrail_name == "PromptInjectionClassifierGuardrail":
-            classifier_model_name = st.sidebar.selectbox(
-                "Classifier Guardrail Model",
-                [
-                    "",
-                    "ProtectAI/deberta-v3-base-prompt-injection-v2",
-                ],
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(model_name="ProtectAI/deberta-v3-base-prompt-injection-v2")
             )
-            if classifier_model_name != "":
-                st.session_state.guardrails.append(
-                    getattr(
-                        importlib.import_module("guardrails_genie.guardrails"),
-                        guardrail_name,
-                    )(model_name=classifier_model_name)
-                )
         elif guardrail_name == "PresidioEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
                 getattr(
@@ -223,6 +215,7 @@ def initialize_guardrails_on_playground():
                     guardrail_name,
                 )()
             )
+    rich.print(f"{st.session_state.guardrails=}")
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
     )

@@ -10,16 +10,18 @@ except ImportError:
 from guardrails_genie.guardrails.injection import (
     PromptInjectionClassifierGuardrail,
     PromptInjectionLlamaGuardrail,
-    PromptInjectionSurveyGuardrail,
+    PromptInjectionLLMGuardrail,
+)
+from guardrails_genie.guardrails.privilege_escalation import (
+    OpenAIPrivilegeEscalationGuardrail,
 )
 from guardrails_genie.guardrails.secrets_detection import SecretsDetectionGuardrail
-from guardrails_genie.guardrails.privilege_escalation import OpenAIPrivilegeEscalationGuardrail
 
 from .manager import GuardrailManager
 
 __all__ = [
     "PromptInjectionLlamaGuardrail",
-    "PromptInjectionSurveyGuardrail",
+    "PromptInjectionLLMGuardrail",
     "PromptInjectionClassifierGuardrail",
     "PresidioEntityRecognitionGuardrail",
     "RegexEntityRecognitionGuardrail",

@@ -8,16 +8,16 @@ from ...llm import OpenAIModel
 from ..base import Guardrail
 
 
-class SurveyGuardrailResponse(BaseModel):
+class LLMGuardrailResponse(BaseModel):
     injection_prompt: bool
     is_direct_attack: bool
     attack_type: Optional[str]
     explanation: Optional[str]
 
 
-class PromptInjectionSurveyGuardrail(Guardrail):
+class PromptInjectionLLMGuardrail(Guardrail):
     """
-    A guardrail that uses a summarized version of the research paper
+    The `PromptInjectionLLMGuardrail` uses a summarized version of the research paper
     [An Early Categorization of Prompt Injection Attacks on Large Language Models](https://arxiv.org/abs/2402.00898)
     to assess whether a prompt is a prompt injection attack or not.
 
@@ -127,7 +127,7 @@ Here are some strict instructions that you must follow:
         chat_completion = self.llm_model.predict(
             user_prompts=user_prompt,
             system_prompt=system_prompt,
-            response_format=SurveyGuardrailResponse,
+            response_format=LLMGuardrailResponse,
             **kwargs,
         )
         response = chat_completion.choices[0].message.parsed

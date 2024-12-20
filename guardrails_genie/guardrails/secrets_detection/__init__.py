@@ -1,8 +1,8 @@
 from guardrails_genie.guardrails.secrets_detection.secrets_detection import (
-    SecretsDetectionGuardrail,
-    SecretsDetectionSimpleResponse,
-    SecretsDetectionResponse,
     REDACTION,
+    SecretsDetectionGuardrail,
+    SecretsDetectionResponse,
+    SecretsDetectionSimpleResponse,
     redact_value,
 )
 

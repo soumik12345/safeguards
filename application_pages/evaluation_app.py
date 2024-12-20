@@ -96,10 +96,7 @@ def initialize_guardrails():
             )
             st.session_state.llama_guard_checkpoint_name = llama_guard_checkpoint_name
             st.session_state.guardrails.append(
-                getattr(
-                    import_module("guardrails_genie.guardrails"),
-                    guardrail_name,
-                )(
+                getattr(import_module("guardrails_genie.guardrails"), guardrail_name,)(
                     checkpoint=(
                         None
                         if st.session_state.llama_guard_checkpoint_name == ""

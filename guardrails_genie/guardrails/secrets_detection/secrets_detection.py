@@ -4,7 +4,7 @@ import os
 import pathlib
 import tempfile
 from enum import Enum
-from typing import Optional, Any
+from typing import Any, Optional
 
 import weave
 from pydantic import BaseModel, PrivateAttr
@@ -12,9 +12,9 @@ from pydantic import BaseModel, PrivateAttr
 from guardrails_genie.guardrails.base import Guardrail
 
 try:
+    import hyperscan
     from detect_secrets import SecretsCollection
     from detect_secrets.settings import default_settings
-    import hyperscan
 except ImportError:
     raise ImportError(
         "The `detect-secrets` and the `hyperscan` packages are required for using the SecretsGuardrail. "

@@ -5,11 +5,10 @@ from typing import Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wandb
 import weave
 from safetensors.torch import load_model
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
-import wandb
 
 from ..base import Guardrail
 

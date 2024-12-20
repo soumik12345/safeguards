@@ -10,6 +10,7 @@ import streamlit as st
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wandb
 from datasets import load_dataset
 from pydantic import BaseModel
 from rich.progress import track
@@ -17,8 +18,6 @@ from safetensors.torch import load_model, save_model
 from sklearn.metrics import roc_auc_score, roc_curve
 from torch.utils.data import DataLoader
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
-import wandb
 
 
 class DatasetArgs(BaseModel):

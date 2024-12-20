@@ -1,25 +1,32 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
-import os
-import json
-import tqdm
-import hashlib
 import asyncio
+import hashlib
+import json
 import multiprocessing
+import os
 from typing import Any
 
+import tqdm
 import weave
-from diskcache import Cache
 from datasets import load_dataset
+from diskcache import Cache
 from pydantic import BaseModel, Field
 
 from guardrails_genie.llm import AsyncOpenAIModel
 
 
 class PrivEscResponse(BaseModel):
-    is_priv_esc: bool = Field(..., description="Whether the prompt is a privilege escalation prompt or not. True if it is, False otherwise.")
-    reason: str = Field(..., description="Reasoning for why the prompt is a privilege escalation prompt or not.")
+    is_priv_esc: bool = Field(
+        ...,
+        description="Whether the prompt is a privilege escalation prompt or not. True if it is, False otherwise.",
+    )
+    reason: str = Field(
+        ...,
+        description="Reasoning for why the prompt is a privilege escalation prompt or not.",
+    )
 
 
 class PrivEscDataset(BaseModel):
@@ -28,7 +35,7 @@ class PrivEscDataset(BaseModel):
 
 
 class GenerateSyntheticPrivEscDataset(weave.Model):
-    llm_model: Any =  Field(None)
+    llm_model: Any = Field(None)
     system_prompt: str = """
 You are provided with a prompt and you are tasked with determining if the prompt can be categorized as a privilege escalation prompt. 
 
@@ -57,6 +64,7 @@ If the prompt is a privilege escalation prompt, return True. Otherwise, return F
 {prompt}
 </prompt>
 """
+
     def model_post_init(self, __context: Any) -> None:
         self.llm_model = AsyncOpenAIModel(model_name="gpt-4o")
 
@@ -71,6 +79,7 @@ If the prompt is a privilege escalation prompt, return True. Otherwise, return F
 
         return PrivEscDataset(prompt=prompt, priv_esc_response=response)
 
+
 generate_synthetic_priv_esc_dataset = GenerateSyntheticPrivEscDataset()
 
 # Set up diskcache
@@ -80,7 +89,7 @@ cache = Cache(cache_dir)
 
 
 def hash_prompt(prompt: str) -> str:
-    return hashlib.sha256(prompt.encode('utf-8')).hexdigest()
+    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
 
 
 def generate_synthetic_dataset(prompt: str):
@@ -97,20 +106,23 @@ def generate_synthetic_dataset(prompt: str):
 if __name__ == "__main__":
     # Load the dataet
     train_ds = load_dataset(
-        "Bogdan01m/Catch_the_prompt_injection_or_jailbreak_or_benign",
-        split="train"
+        "Bogdan01m/Catch_the_prompt_injection_or_jailbreak_or_benign", split="train"
     )
     train_ds = train_ds.to_pandas()
-    prompt_injections = list(set(train_ds[train_ds.type == "prompt_injection"].prompt.values))
+    prompt_injections = list(
+        set(train_ds[train_ds.type == "prompt_injection"].prompt.values)
+    )
     print("Number of prompt injections: ", len(prompt_injections))
 
-    output_file = "guardrails_genie/guardrails/privilege_escalation/priv_esc_dataset.jsonl"
+    output_file = (
+        "guardrails_genie/guardrails/privilege_escalation/priv_esc_dataset.jsonl"
+    )
     processes = 8
 
     with open(output_file, "a") as f:
         with multiprocessing.Pool(processes=processes) as pool:
             for result in tqdm.tqdm(
                 pool.imap_unordered(generate_synthetic_dataset, prompt_injections),
-                total=len(prompt_injections)
+                total=len(prompt_injections),
             ):
                 f.write(json.dumps(result) + "\n")

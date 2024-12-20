@@ -10,9 +10,9 @@ from llm_guard.util import configure_logger
 from guardrails_genie.guardrails import GuardrailManager
 from guardrails_genie.guardrails.base import Guardrail
 from guardrails_genie.guardrails.secrets_detection import (
+    SecretsDetectionGuardrail,
     SecretsDetectionResponse,
     SecretsDetectionSimpleResponse,
-    SecretsDetectionGuardrail,
 )
 from guardrails_genie.metrics import AccuracyMetric
 

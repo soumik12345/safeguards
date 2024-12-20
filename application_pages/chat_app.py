@@ -2,8 +2,8 @@ import importlib
 
 import streamlit as st
 import weave
-from guardrails_genie.guardrails import GuardrailManager
-from guardrails_genie.llm import OpenAIModel
+
+from guardrails_genie.utils import initialize_guardrails_on_playground
 
 
 def initialize_session_state():
@@ -11,6 +11,10 @@ def initialize_session_state():
         st.session_state.guardrails = []
     if "guardrail_names" not in st.session_state:
         st.session_state.guardrail_names = []
+    if "guardrails_manager" not in st.session_state:
+        st.session_state.guardrails_manager = None
+    if "initialize_guardrails_button" not in st.session_state:
+        st.session_state.initialize_guardrails_button = False
 
 
 weave.init(project_name="guardrails_genie")
@@ -32,3 +36,13 @@ guardrail_names = st.sidebar.multiselect(
     ],
 )
 st.session_state.guardrail_names = guardrail_names
+
+initialize_guardrails_button = st.sidebar.button("Initialize Guardrails")
+st.session_state.initialize_guardrails_button = initialize_guardrails_button
+
+if st.session_state.initialize_guardrails_button:
+    initialize_guardrails_on_playground()
+    st.write(
+        "Number of guardrails initialized: ",
+        len(st.session_state.guardrails_manager.guardrails),
+    )
