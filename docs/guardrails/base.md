@@ -1,3 +1,4 @@
 # Guardrail Base Class
 
-::: guardrails_genie.guardrails.base
+::: safeguards.guardrails.base
+

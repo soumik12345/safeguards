@@ -8,7 +8,7 @@ A collection of guardrails for detecting and anonymizing various types of entiti
 Simple pattern-based entity detection using regular expressions.
 
 ```python
-from guardrails_genie.guardrails.entity_recognition import RegexEntityRecognitionGuardrail
+from safeguards.guardrails.entity_recognition import RegexEntityRecognitionGuardrail
 
 # Initialize with default PII patterns
 guardrail = RegexEntityRecognitionGuardrail(should_anonymize=True)
@@ -25,7 +25,7 @@ guardrail = RegexEntityRecognitionGuardrail(patterns=custom_patterns, should_ano
 Advanced entity detection using Microsoft's Presidio analyzer.
 
 ```python
-from guardrails_genie.guardrails.entity_recognition import PresidioEntityRecognitionGuardrail
+from safeguards.guardrails.entity_recognition import PresidioEntityRecognitionGuardrail
 
 # Initialize with default entities
 guardrail = PresidioEntityRecognitionGuardrail(should_anonymize=True)
@@ -42,7 +42,7 @@ guardrail = PresidioEntityRecognitionGuardrail(
 Entity detection using transformer-based models.
 
 ```python
-from guardrails_genie.guardrails.entity_recognition import TransformersEntityRecognitionGuardrail
+from safeguards.guardrails.entity_recognition import TransformersEntityRecognitionGuardrail
 
 # Initialize with default model
 guardrail = TransformersEntityRecognitionGuardrail(should_anonymize=True)
@@ -59,7 +59,7 @@ guardrail = TransformersEntityRecognitionGuardrail(
 Advanced detection of restricted terms, competitor mentions, and brand protection using LLMs.
 
 ```python
-from guardrails_genie.guardrails.entity_recognition import RestrictedTermsJudge
+from safeguards.guardrails.entity_recognition import RestrictedTermsJudge
 
 # Initialize with OpenAI model
 guardrail = RestrictedTermsJudge(should_anonymize=True)
@@ -101,11 +101,11 @@ The module includes comprehensive evaluation tools and test cases:
 
 ```python
 # PII Detection Benchmark
-from guardrails_genie.guardrails.entity_recognition.pii_examples.pii_benchmark import main
+from safeguards.guardrails.entity_recognition.pii_examples.pii_benchmark import main
 main()
 
 # (TODO): Restricted Terms Testing
-from guardrails_genie.guardrails.entity_recognition.banned_terms_examples.banned_term_benchmark import main
+from safeguards.guardrails.entity_recognition.banned_terms_examples.banned_term_benchmark import main
 main()
 ```
 

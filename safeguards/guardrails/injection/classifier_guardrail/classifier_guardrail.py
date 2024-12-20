@@ -39,6 +39,7 @@ class PromptInjectionClassifierGuardrail(Guardrail):
             A wrapper around the guard method to provide prediction capability
             for the given prompt.
     """
+
     model_name: str
     checkpoint: Optional[str] = None
     classifier_guardrail: Optional[Guardrail] = None

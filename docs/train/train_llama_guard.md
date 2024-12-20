@@ -1,3 +1,3 @@
 # Train Llama Guard
 
-::: guardrails_genie.train.llama_guard
+::: safeguards.train.llama_guard

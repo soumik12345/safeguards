@@ -3,7 +3,7 @@ site_name: Safeguards
 
 theme:
   name: material
-  logo: assets/wandb_logo.svg
+  logo: assets/safeguards-logo-icon.png
   favicon: assets/wandb_logo.svg
   palette: 
     # Palette toggle for light mode
