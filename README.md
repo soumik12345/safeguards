@@ -1,13 +1,3 @@
----
-title: Safeguards
-emoji: 🧞‍♂️
-colorFrom: blue
-colorTo: purple
-sdk: streamlit
-app_file: app.py
-pinned: false
----
-
 # Safeguards
 
 Safeguards is a tool that helps you implement guardrails in your LLM applications.
