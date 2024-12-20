@@ -23,7 +23,10 @@ class PromptInjectionLlamaGuardrail(Guardrail):
     !!! example "Sample Usage"
         ```python
         import weave
-        from guardrails_genie.guardrails import PromptInjectionLlamaGuardrail, GuardrailManager
+        from guardrails_genie.guardrails.injection.classifier_guardrail import (
+            PromptInjectionLlamaGuardrail,
+        )
+        from guardrails_genie.guardrails import GuardrailManager
 
         weave.init(project_name="guardrails-genie")
         guardrail_manager = GuardrailManager(

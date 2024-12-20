@@ -15,6 +15,7 @@ from guardrails_genie.guardrails.injection import (
 )
 from guardrails_genie.guardrails.privilege_escalation import (
     OpenAIPrivilegeEscalationGuardrail,
+    SQLInjectionGuardrail,
 )
 from guardrails_genie.guardrails.secrets_detection import SecretsDetectionGuardrail
 
@@ -30,4 +31,5 @@ __all__ = [
     "GuardrailManager",
     "SecretsDetectionGuardrail",
     "OpenAIPrivilegeEscalationGuardrail",
+    "SQLInjectionGuardrail",
 ]

@@ -1,3 +1,3 @@
-from .priv_esc_guardrails import OpenAIPrivilegeEscalationGuardrail
+from .priv_esc_guardrails import OpenAIPrivilegeEscalationGuardrail, SQLInjectionGuardrail
 
-__all__ = ["OpenAIPrivilegeEscalationGuardrail"]
+__all__ = ["OpenAIPrivilegeEscalationGuardrail", "SQLInjectionGuardrail"]
