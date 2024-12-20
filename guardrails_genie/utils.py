@@ -149,11 +149,19 @@ def initialize_guardrails_on_playground():
     st.session_state.guardrails = []
     for guardrail_name in st.session_state.guardrail_names:
         if guardrail_name == "PromptInjectionLLMGuardrail":
+            prompt_injection_llm_model = st.sidebar.selectbox(
+                "Prompt Injection Guardrail LLM", ["gpt-4o-mini", "gpt-4o"]
+            )
+            st.session_state.prompt_injection_llm_model = prompt_injection_llm_model
             st.session_state.guardrails.append(
                 getattr(
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
-                )(llm_model=OpenAIModel(model_name="gpt-4o-mini"))
+                )(
+                    llm_model=OpenAIModel(
+                        model_name=st.session_state.prompt_injection_llm_model
+                    )
+                )
             )
         elif guardrail_name == "PromptInjectionClassifierGuardrail":
             st.session_state.guardrails.append(
@@ -161,6 +169,27 @@ def initialize_guardrails_on_playground():
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
                 )(model_name="ProtectAI/deberta-v3-base-prompt-injection-v2")
+            )
+        elif guardrail_name == "PromptInjectionLlamaGuardrail":
+            prompt_injection_llama_guard_checkpoint_name = st.sidebar.text_input(
+                "Checkpoint Name",
+                value="wandb://geekyrakshit/guardrails-genie/ruk3f3b4-model:v8",
+            )
+            st.session_state.prompt_injection_llama_guard_checkpoint_name = (
+                prompt_injection_llama_guard_checkpoint_name
+            )
+            st.session_state.guardrails.append(
+                getattr(
+                    importlib.import_module("guardrails_genie.guardrails"),
+                    guardrail_name,
+                )(
+                    checkpoint=(
+                        None
+                        if st.session_state.prompt_injection_llama_guard_checkpoint_name
+                        == ""
+                        else st.session_state.prompt_injection_llama_guard_checkpoint_name
+                    )
+                )
             )
         elif guardrail_name == "PresidioEntityRecognitionGuardrail":
             st.session_state.guardrails.append(
@@ -189,24 +218,6 @@ def initialize_guardrails_on_playground():
                     importlib.import_module("guardrails_genie.guardrails"),
                     guardrail_name,
                 )(should_anonymize=True)
-            )
-        elif guardrail_name == "PromptInjectionLlamaGuardrail":
-            llama_guard_checkpoint_name = st.sidebar.text_input(
-                "Checkpoint Name",
-                value="wandb://geekyrakshit/guardrails-genie/ruk3f3b4-model:v8",
-            )
-            st.session_state.llama_guard_checkpoint_name = llama_guard_checkpoint_name
-            st.session_state.guardrails.append(
-                getattr(
-                    importlib.import_module("guardrails_genie.guardrails"),
-                    guardrail_name,
-                )(
-                    checkpoint=(
-                        None
-                        if st.session_state.llama_guard_checkpoint_name == ""
-                        else st.session_state.llama_guard_checkpoint_name
-                    )
-                )
             )
         else:
             st.session_state.guardrails.append(

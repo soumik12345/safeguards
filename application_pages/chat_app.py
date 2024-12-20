@@ -15,6 +15,17 @@ def initialize_session_state():
         st.session_state.guardrails_manager = None
     if "initialize_guardrails_button" not in st.session_state:
         st.session_state.initialize_guardrails_button = False
+    if "start_chat_button" not in st.session_state:
+        st.session_state.start_chat_button = False
+    if "prompt" not in st.session_state:
+        st.session_state.prompt = ""
+    if "test_guardrails_button" not in st.session_state:
+        st.session_state.test_guardrails_button = False
+
+    if "prompt_injection_llm_model" not in st.session_state:
+        st.session_state.prompt_injection_llm_model = None
+    if "prompt_injection_llama_guard_checkpoint_name" not in st.session_state:
+        st.session_state.prompt_injection_llama_guard_checkpoint_name = None
 
 
 weave.init(project_name="guardrails_genie")
@@ -38,11 +49,20 @@ guardrail_names = st.sidebar.multiselect(
 st.session_state.guardrail_names = guardrail_names
 
 initialize_guardrails_button = st.sidebar.button("Initialize Guardrails")
-st.session_state.initialize_guardrails_button = initialize_guardrails_button
+st.session_state.initialize_guardrails_button = (
+    initialize_guardrails_button
+    if not st.session_state.initialize_guardrails_button
+    else st.session_state.initialize_guardrails_button
+)
 
 if st.session_state.initialize_guardrails_button:
     initialize_guardrails_on_playground()
-    st.write(
-        "Number of guardrails initialized: ",
-        len(st.session_state.guardrails_manager.guardrails),
-    )
+
+    prompt = st.text_area("User Prompt", value="")
+    st.session_state.prompt = prompt
+
+    test_guardrails_button = st.button("Test Guardrails")
+    st.session_state.test_guardrails_button = test_guardrails_button
+
+    if st.session_state.test_guardrails_button:
+        st.write("Maza Ayega")
