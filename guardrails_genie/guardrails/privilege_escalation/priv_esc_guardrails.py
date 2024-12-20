@@ -85,7 +85,7 @@ class SQLInjectionGuardrail(Guardrail):
     def model_post_init(self, __context: Any) -> None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        tokenizer = MobileBertTokenizer.from_pretrained(self.model_name)
+        self.tokenizer = MobileBertTokenizer.from_pretrained(self.model_name)
         self.model = MobileBertForSequenceClassification.from_pretrained(
             self.model_name
         )
