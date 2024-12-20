@@ -1,5 +1,5 @@
-from guardrails_genie.guardrails import OpenAIPrivilegeEscalationGuardrail
-from guardrails_genie.llm import OpenAIModel
+from safeguards.guardrails import OpenAIPrivilegeEscalationGuardrail
+from safeguards.llm import OpenAIModel
 
 
 def test_privilege_escalation_safe():

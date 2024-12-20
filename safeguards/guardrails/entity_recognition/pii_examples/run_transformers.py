@@ -1,11 +1,11 @@
 import weave
 
-from guardrails_genie.guardrails.entity_recognition.pii_examples.pii_test_examples import (
+from safeguards.guardrails.entity_recognition.pii_examples.pii_test_examples import (
     EDGE_CASE_EXAMPLES,
     PII_TEST_EXAMPLES,
     run_test_case,
 )
-from guardrails_genie.guardrails.entity_recognition.transformers_entity_recognition_guardrail import (
+from safeguards.guardrails.entity_recognition.transformers_entity_recognition_guardrail import (
     TransformersEntityRecognitionGuardrail,
 )
 

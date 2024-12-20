@@ -2,7 +2,7 @@ import os
 
 import wandb
 
-from guardrails_genie.guardrails import PromptInjectionClassifierGuardrail
+from safeguards.guardrails import PromptInjectionClassifierGuardrail
 
 
 def test_prompt_injection_classifier_prompt_guard_86m_checkpoint():

@@ -1,5 +1,5 @@
-from guardrails_genie.guardrails import PromptInjectionLLMGuardrail
-from guardrails_genie.llm import OpenAIModel
+from safeguards.guardrails import PromptInjectionLLMGuardrail
+from safeguards.llm import OpenAIModel
 
 
 def test_prompt_injection_llm_safe():

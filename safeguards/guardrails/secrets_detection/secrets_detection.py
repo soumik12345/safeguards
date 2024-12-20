@@ -9,7 +9,7 @@ from typing import Any, Optional
 import weave
 from pydantic import BaseModel, PrivateAttr
 
-from guardrails_genie.guardrails.base import Guardrail
+from safeguards.guardrails.base import Guardrail
 
 try:
     import hyperscan

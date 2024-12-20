@@ -366,7 +366,7 @@ def main():
 
 
 if __name__ == "__main__":
-    from guardrails_genie.guardrails.entity_recognition.presidio_entity_recognition_guardrail import (
+    from safeguards.guardrails.entity_recognition.presidio_entity_recognition_guardrail import (
         PresidioEntityRecognitionGuardrail,
     )
 

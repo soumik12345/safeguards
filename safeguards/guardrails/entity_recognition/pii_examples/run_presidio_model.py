@@ -1,21 +1,21 @@
 import weave
 
-from guardrails_genie.guardrails.entity_recognition.pii_examples.pii_test_examples import (
+from safeguards.guardrails.entity_recognition.pii_examples.pii_test_examples import (
     EDGE_CASE_EXAMPLES,
     PII_TEST_EXAMPLES,
     run_test_case,
 )
-from guardrails_genie.guardrails.entity_recognition.regex_entity_recognition_guardrail import (
-    RegexEntityRecognitionGuardrail,
+from safeguards.guardrails.entity_recognition.presidio_entity_recognition_guardrail import (
+    PresidioEntityRecognitionGuardrail,
 )
 
 
 def test_pii_detection():
     """Test PII detection scenarios using predefined test cases"""
-    weave.init("guardrails-genie-pii-regex-model")
+    weave.init("guardrails-genie-pii-presidio-model")
 
     # Create the guardrail with default entities and anonymization enabled
-    pii_guardrail = RegexEntityRecognitionGuardrail(
+    pii_guardrail = PresidioEntityRecognitionGuardrail(
         should_anonymize=True, show_available_entities=True
     )
 

@@ -11,7 +11,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from guardrails_genie.utils import StreamlitProgressbarCallback
+from safeguards.utils import StreamlitProgressbarCallback
 
 
 def train_binary_classifier(

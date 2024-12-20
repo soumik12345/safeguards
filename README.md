@@ -1,5 +1,5 @@
 ---
-title: Guardrails-Genie
+title: Safeguards
 emoji: 🧞‍♂️
 colorFrom: blue
 colorTo: purple
@@ -8,9 +8,9 @@ app_file: app.py
 pinned: false
 ---
 
-# Guardrails-Genie
+# Safeguards
 
-Guardrails-Genie is a tool that helps you implement guardrails in your LLM applications.
+Safeguards is a tool that helps you implement guardrails in your LLM applications.
 
 ## Installation
 

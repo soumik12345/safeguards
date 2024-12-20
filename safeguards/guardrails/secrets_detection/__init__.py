@@ -1,4 +1,4 @@
-from guardrails_genie.guardrails.secrets_detection.secrets_detection import (
+from safeguards.guardrails.secrets_detection.secrets_detection import (
     REDACTION,
     SecretsDetectionGuardrail,
     SecretsDetectionResponse,

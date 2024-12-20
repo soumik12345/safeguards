@@ -4,8 +4,8 @@ import streamlit as st
 import weave
 from dotenv import load_dotenv
 
-from guardrails_genie.llm import OpenAIModel
-from guardrails_genie.utils import initialize_guardrails_on_playground
+from safeguards.llm import OpenAIModel
+from safeguards.utils import initialize_guardrails_on_playground
 
 load_dotenv()
 

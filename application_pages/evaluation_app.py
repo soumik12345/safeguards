@@ -5,9 +5,9 @@ import pandas as pd
 import streamlit as st
 import weave
 
-from guardrails_genie.guardrails import GuardrailManager
-from guardrails_genie.llm import OpenAIModel
-from guardrails_genie.metrics import AccuracyMetric
+from safeguards.guardrails import GuardrailManager
+from safeguards.llm import OpenAIModel
+from safeguards.metrics import AccuracyMetric
 
 
 def initialize_session_state():

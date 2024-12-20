@@ -11,7 +11,7 @@ from datasets import load_dataset
 from diskcache import Cache
 from pydantic import BaseModel, Field
 
-from guardrails_genie.llm import AsyncOpenAIModel
+from safeguards.llm import AsyncOpenAIModel
 
 
 class PrivEscResponse(BaseModel):

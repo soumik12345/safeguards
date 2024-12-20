@@ -1,11 +1,11 @@
 import weave
 
-from guardrails_genie.guardrails.entity_recognition.banned_terms_examples.banned_term_examples import (
+from safeguards.guardrails.entity_recognition.banned_terms_examples.banned_term_examples import (
     EDGE_CASE_EXAMPLES,
     RESTRICTED_TERMS_EXAMPLES,
     run_test_case,
 )
-from guardrails_genie.guardrails.entity_recognition.regex_entity_recognition_guardrail import (
+from safeguards.guardrails.entity_recognition.regex_entity_recognition_guardrail import (
     RegexEntityRecognitionGuardrail,
 )
 

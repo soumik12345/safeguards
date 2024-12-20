@@ -2,7 +2,7 @@ import os
 
 import streamlit as st
 
-from guardrails_genie.train.llama_guard import DatasetArgs, LlamaGuardFineTuner
+from safeguards.train.llama_guard import DatasetArgs, LlamaGuardFineTuner
 
 
 def initialize_session_state():

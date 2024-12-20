@@ -5,8 +5,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from guardrails_genie.guardrails import SecretsDetectionGuardrail
-from guardrails_genie.guardrails.secrets_detection import (
+from safeguards.guardrails import SecretsDetectionGuardrail
+from safeguards.guardrails.secrets_detection import (
     REDACTION,
     SecretsDetectionResponse,
     SecretsDetectionSimpleResponse,
@@ -79,7 +79,7 @@ def test_redact_hash():
 
 
 def test_secrets_detection_guardrail_detect_types(mock_secrets_guard):
-    from guardrails_genie.guardrails.secrets_detection import (
+    from safeguards.guardrails.secrets_detection import (
         REDACTION,
         SecretsDetectionGuardrail,
     )
@@ -96,7 +96,7 @@ def test_secrets_detection_guardrail_detect_types(mock_secrets_guard):
 
 
 def test_secrets_detection_guardrail_simple_response(mock_secrets_guard):
-    from guardrails_genie.guardrails.secrets_detection import (
+    from safeguards.guardrails.secrets_detection import (
         REDACTION,
         SecretsDetectionGuardrail,
     )
@@ -112,7 +112,7 @@ def test_secrets_detection_guardrail_simple_response(mock_secrets_guard):
 
 
 def test_secrets_detection_guardrail_no_secrets(mock_secrets_guard):
-    from guardrails_genie.guardrails.secrets_detection import (
+    from safeguards.guardrails.secrets_detection import (
         REDACTION,
         SecretsDetectionGuardrail,
     )
