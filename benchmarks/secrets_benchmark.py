@@ -190,7 +190,7 @@ def main():
     """
     Main function to initialize and evaluate the secrets detectors.
     """
-    client = weave.init("parambharat/secrets-detection")
+    weave.init("parambharat/secrets-detection")
     dataset = weave.ref("secrets-detection-benchmark:latest").get()
     llm_guard_guardrail = LLMGuardSecretsDetector()
     guardrails_ai_guardrail = GuardrailsAISecretsDetector()
