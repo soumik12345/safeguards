@@ -10,6 +10,9 @@ class EvaluationTraceParser:
     def __init__(self, project: str, call_id: str) -> None:
         self.base_call = weave.init(project).get_call(call_id=call_id)
         self.predict_and_score_calls = []
+    
+    def _get_call_name_from_op_name(self, op_name: str) -> str:
+        return op_name.split("/")[-1].split(":")[0]
 
     def register_predict_and_score_calls(self):
         for predict_and_score_call in track(
@@ -21,7 +24,9 @@ class EvaluationTraceParser:
                 self.predict_and_score_calls.append(
                     {
                         "trace_id": predict_and_score_call.id,
-                        "call_name": predict_and_score_call._op_name,
+                        "call_name": self._get_call_name_from_op_name(
+                            predict_and_score_call._op_name
+                        ),
                         "child_calls": [],
                     }
                 )
@@ -35,7 +40,9 @@ class EvaluationTraceParser:
     def parse_call(self, child_call) -> dict:
         call_dict = {
             "call_id": child_call.id,
-            "call_name": child_call._op_name,
-            "child_calls": [self.parse_call(child) for child in child_call.children()]
+            "call_name": self._get_call_name_from_op_name(child_call._op_name),
+            "inputs": dict(child_call.inputs),
+            "outputs": dict(child_call.output),
+            "child_calls": [self.parse_call(child) for child in child_call.children()],
         }
         return call_dict
