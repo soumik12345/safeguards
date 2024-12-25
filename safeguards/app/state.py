@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from ..llm import OpenAIModel
+
 
 class SettingState(BaseModel):
     wandb_username: Optional[str]
@@ -12,3 +14,4 @@ class SettingState(BaseModel):
 
 class AppState(BaseModel):
     settings_state: Optional[SettingState] = None
+    llm_model: Optional[OpenAIModel] = None

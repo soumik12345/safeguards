@@ -3,7 +3,7 @@ import os
 import rich
 import wandb
 from fasthtml.core import serve
-from monsterui.core import FastHTML, Theme
+from monsterui.core import FastHTML, P, Theme
 
 from safeguards.app.components import (
     GuardrailsPlaygroundPage,
@@ -12,6 +12,7 @@ from safeguards.app.components import (
 )
 from safeguards.app.components.commons import AlertStatusNotification
 from safeguards.app.state import AppState, SettingState
+from safeguards.llm import OpenAIModel
 
 app = FastHTML(hdrs=Theme.blue.headers())
 route = app.route
@@ -70,6 +71,13 @@ def save_settings(
 @app.get("/guardrails_playground")
 def guardrails_playground_page():
     return GuardrailsPlaygroundPage(state=app_state)
+
+
+@app.post("/playground_llm_selection_update")
+async def guardrails_playground_llm_selection(playground_llm_selection: str):
+    app_state.llm_model = OpenAIModel(model_name=playground_llm_selection)
+    rich.print("OpenAI Model initialized!!!")
+    return P("")
 
 
 serve()
