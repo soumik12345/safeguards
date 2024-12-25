@@ -5,7 +5,11 @@ import wandb
 from fasthtml.core import serve
 from monsterui.core import FastHTML, Theme
 
-from safeguards.app.components import SafeGuardsNavBar, SettingsPage
+from safeguards.app.components import (
+    GuardrailsPlaygroundPage,
+    SafeGuardsNavBar,
+    SettingsPage,
+)
 from safeguards.app.components.commons import AlertStatusNotification
 from safeguards.app.state import AppState, SettingState
 
@@ -61,6 +65,11 @@ def save_settings(
         )
     rich.print(status_messages)
     return AlertStatusNotification(message="\n".join(status_messages), success=success)
+
+
+@app.get("/guardrails_playground")
+def guardrails_playground_page():
+    return GuardrailsPlaygroundPage(state=app_state)
 
 
 serve()
