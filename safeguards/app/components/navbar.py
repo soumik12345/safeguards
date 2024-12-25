@@ -19,13 +19,12 @@ def SafeGuardsNavBar():
         NavBarCenter(
             NavBarNav(
                 Li(
-                    A("Parent", href=""),
+                    A("Guardrails", href=""),
                     NavBarNavContainer(
-                        Li(A("Item", href="")),
-                        Li(A("Item", href="")),
+                        Li(A("Playground", href="/guardrails_playground")),
+                        Li(A("Evaluations", href="/guardrails_evaluations")),
                     ),
                 ),
-                Li(A("Item", href="")),
             )
         ),
         NavBarRSide(
