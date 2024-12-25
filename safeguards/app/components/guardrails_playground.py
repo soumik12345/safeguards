@@ -5,6 +5,20 @@ from .commons import AlertStatusNotification
 from .navbar import SafeGuardsNavBar
 
 
+def PlaygroundHeaders():
+    return (
+        Grid(
+            DivCentered(
+                DividerLine(y_space=2),
+                H3("Playgorund Settings"),
+                DividerLine(y_space=2),
+            ),
+            DivCentered(DividerLine(y_space=2), H3("Chat"), DividerLine(y_space=2)),
+            cols=2,
+        ),
+    )
+
+
 def GuardrailsPlaygroundPage(state: AppState):
     content = [SafeGuardsNavBar()]
     if state.settings_state is None:
@@ -18,17 +32,7 @@ def GuardrailsPlaygroundPage(state: AppState):
         content.extend(
             [
                 Div(cls="space-y-6 py-6")(Div(H2("Guardrails Playground"))),
-                Grid(
-                    DivCentered(
-                        DividerLine(y_space=2),
-                        H3("Playgorund Settings"),
-                        DividerLine(y_space=2),
-                    ),
-                    DivCentered(
-                        DividerLine(y_space=2), H3("Chat"), DividerLine(y_space=2)
-                    ),
-                    cols=2,
-                ),
+                PlaygroundHeaders(),
             ]
         )
     return Div(cls="p-6 lg:p-10")(*content)
