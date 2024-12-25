@@ -1,13 +1,13 @@
 from monsterui.core import A, Li
 from monsterui.franken import (
+    Div,
+    NavBarCenter,
     NavBarContainer,
     NavBarLSide,
-    NavBarCenter,
-    NavBarRSide,
     NavBarNav,
     NavBarNavContainer,
-    Div,
     NavBarParentIcon,
+    NavBarRSide,
 )
 
 
@@ -31,8 +31,8 @@ def SafeGuardsNavBar():
         NavBarRSide(
             NavBarNav(
                 Li(
-                    A("DropDown", NavBarParentIcon(), href=""),
-                    NavBarNavContainer(Li(A("Item", href="")), Li(A("Item", href=""))),
+                    A("Profile", NavBarParentIcon(), href=""),
+                    NavBarNavContainer(Li(A("Settings", href="/settings"))),
                 ),
             )
         ),
