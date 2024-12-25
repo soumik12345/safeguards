@@ -1,15 +1,39 @@
 from monsterui.core import A, Li
-from monsterui.franken import Container, TabContainer
+from monsterui.franken import (
+    NavBarContainer,
+    NavBarLSide,
+    NavBarCenter,
+    NavBarRSide,
+    NavBarNav,
+    NavBarNavContainer,
+    Div,
+    NavBarParentIcon,
+)
 
 
 def SafeGuardsNavBar():
-    return Container(
-        TabContainer(
-            Li(A("Active", href="#", cls="uk-active")),
-            Li(A("Item", href="#")),
-            Li(A("Item", href="#")),
-            Li(A("Disabled", href="#", cls="uk-disabled")),
-            uk_switcher="connect: #component-nav; animation: uk-animation-fade",
-            alt=True,
+    return NavBarContainer(
+        NavBarLSide(
+            A(Div("SafeGuards", cls="navbar-title"), href="/"),
+        ),
+        NavBarCenter(
+            NavBarNav(
+                Li(
+                    A("Parent", href=""),
+                    NavBarNavContainer(
+                        Li(A("Item", href="")),
+                        Li(A("Item", href="")),
+                    ),
+                ),
+                Li(A("Item", href="")),
+            )
+        ),
+        NavBarRSide(
+            NavBarNav(
+                Li(
+                    A("DropDown", NavBarParentIcon(), href=""),
+                    NavBarNavContainer(Li(A("Item", href="")), Li(A("Item", href=""))),
+                ),
+            )
         ),
     )
