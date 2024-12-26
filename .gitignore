@@ -172,3 +172,5 @@ evaluation_results/
 .cache_dir/
 checkpoints/
 .DS_Store
+.sesskey
+codebase_prompts/

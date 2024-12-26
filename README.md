@@ -22,7 +22,7 @@ pip install safeguards
 ## Running the Web Application
 
 ```bash
-streamlit run app.py
+python app.py
 ```
 
 ## Running Guardrails 
