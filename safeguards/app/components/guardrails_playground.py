@@ -1,3 +1,5 @@
+import importlib
+
 from monsterui.franken import (
     H2,
     H3,
@@ -5,7 +7,9 @@ from monsterui.franken import (
     DivCentered,
     DividerLine,
     Form,
+    FormLabel,
     Grid,
+    LabelCheckboxX,
     LabelUkSelect,
     Option,
 )
@@ -44,8 +48,19 @@ def PlaygroundLLMModelSelection():
     )
 
 
+def PlaygroundGuardrailsCheckboxGroup():
+    guardrail_checkboxes = [
+        Div(LabelCheckboxX(label=cls_name, id=cls_name))
+        for cls_name, cls_obj in vars(
+            importlib.import_module("safeguards.guardrails")
+        ).items()
+        if not cls_name.startswith("__") and cls_name.endswith("Guardrail")
+    ]
+    return Form(FormLabel("Select Guardrails"), *guardrail_checkboxes)
+
+
 def PlaygroundSettingsInterface():
-    return PlaygroundLLMModelSelection()
+    return (PlaygroundLLMModelSelection(), PlaygroundGuardrailsCheckboxGroup())
 
 
 def PlayGroundChatInterface():
@@ -64,7 +79,7 @@ def GuardrailsPlaygroundPage(state: AppState):
         content.extend(
             [
                 Div(cls="space-y-6 py-6")(Div(H2("Guardrails Playground"))),
-                PlaygroundHeaders(),
+                # PlaygroundHeaders(),
                 Grid(
                     Div(cls="space-y-6 py-6")(PlaygroundSettingsInterface()),
                     Div(cls="space-y-6 py-6")(PlayGroundChatInterface()),
