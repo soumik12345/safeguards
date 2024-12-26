@@ -1,4 +1,5 @@
 from monsterui.core import A, Div, Form, P
+from monsterui.daisy import Loading
 from monsterui.franken import DividerSplit, LabelInput, TextFont, UkFormSection
 
 from .navbar import SafeGuardsNavBar
@@ -57,8 +58,10 @@ def SettingsForm():
             ),
             hx_post="/save_settings",
             hx_target="#settings_status",
+            hx_indicator="#loading",
         ),
         Div(id="settings_status"),
+        Loading(id="loading", htmx_indicator=True),
     )
 
 
