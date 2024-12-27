@@ -16,7 +16,7 @@ def SafeGuardsNavBar():
                         ),
                     )
                 ),
-                Li(A("Settings", href="#")),
+                Li(A("Settings", href="/settings")),
                 cls="menu menu-horizontal px-1",
             ),
             cls="flex-none",
