@@ -14,4 +14,5 @@ class SettingState(BaseModel):
 
 class AppState(BaseModel):
     settings_state: Optional[SettingState] = None
+    is_settings_saved: bool = False
     llm_model: Optional[OpenAIModel] = None

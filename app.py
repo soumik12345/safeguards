@@ -3,9 +3,9 @@ import os
 import wandb
 from fasthtml.common import FastHTML, FileResponse, Link, serve
 
-from safeguards.app.components.commons import SafeGuardsNavBar
+from safeguards.app.components.commons import SafeGuardsNavBar, StatusModal
 from safeguards.app.components.landing_page import SafeGuardsLanding
-from safeguards.app.components.settings import SettingsForm, SettingsModal
+from safeguards.app.components.settings import SettingsForm
 from safeguards.app.state import AppState, SettingState
 from safeguards.app.tailwind import add_daisy_and_tailwind
 
@@ -66,7 +66,8 @@ def save_settings(
             wandb_api_key=wandb_api_key,
             openai_api_key=openai_api_key,
         )
-    return SettingsModal(message="\n".join(status_messages), success=success)
+        app_state.is_settings_saved = True
+    return StatusModal(message="\n".join(status_messages), success=success)
 
 
 serve()

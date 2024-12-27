@@ -14,14 +14,6 @@ def SettingsFormInput(label: str, id: str, input_type: str = "text"):
     )
 
 
-def SettingsModal(message: str, success: bool):
-    return Div(
-        Span(message),
-        role="alert",
-        cls="alert alert-success" if success else "alert alert-error",
-    )
-
-
 def SettingsForm():
     return Div(
         Div(
