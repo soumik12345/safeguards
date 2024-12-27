@@ -1,24 +1,22 @@
-import streamlit as st
+from fasthtml.common import FastHTML, FileResponse, serve, Link, Button
+from safeguards.app.tailwind import add_daisy_and_tailwind
 
-intro_page = st.Page(
-    "application_pages/intro_page.py", title="Authenticate", icon=":material/guardian:"
+
+app = FastHTML(
+    hdrs=Link(rel="stylesheet", href="app.css", type="text/css")
 )
-chat_page = st.Page(
-    "application_pages/chat_app.py",
-    title="Playground",
-    icon=":material/sports_esports:",
-)
-evaluation_page = st.Page(
-    "application_pages/evaluation_app.py",
-    title="Evaluation",
-    icon=":material/monitoring:",
-)
-page_navigation = st.navigation(
-    [
-        intro_page,
-        chat_page,
-        evaluation_page,
-    ]
-)
-st.set_page_config(page_title="Guardrails Genie", page_icon=":material/guardian:")
-page_navigation.run()
+app.static_route_exts(static_path="public")
+add_daisy_and_tailwind(app)
+route = app.route
+
+@app.get("/{fname:path}.{ext:static}")
+def get_static(fname: str, ext: str):
+    return FileResponse(f"public/{fname}.{ext}")
+
+
+@app.get("/")
+def get_index():
+    return Button("Button", cls="btn")
+
+
+serve()
