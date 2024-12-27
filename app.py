@@ -1,15 +1,17 @@
 import os
 
 import wandb
-from fasthtml.common import FastHTML, FileResponse, Link, serve
+from fasthtml.common import FastHTML, FileResponse, serve
 
 from safeguards.app.components.commons import SafeGuardsNavBar, StatusModal
+from safeguards.app.components.guardrails_playground import GuardrailsPlayGroundPage
 from safeguards.app.components.landing_page import SafeGuardsLanding
 from safeguards.app.components.settings import SettingsForm
 from safeguards.app.state import AppState, SettingState
 from safeguards.app.tailwind import add_daisy_and_tailwind
+from safeguards.llm import OpenAIModel
 
-app = FastHTML(hdrs=Link(rel="stylesheet", href="app.css", type="text/css"))
+app = FastHTML()
 app.static_route_exts(static_path="public")
 add_daisy_and_tailwind(app)
 route = app.route
@@ -68,6 +70,26 @@ def save_settings(
         )
         app_state.is_settings_saved = True
     return StatusModal(message="\n".join(status_messages), success=success)
+
+
+@app.get("/guardrails_playground")
+def get_guardrails_playground():
+    return (SafeGuardsNavBar(), GuardrailsPlayGroundPage(state=app_state))
+
+
+@app.post("/playground_llm_selection_update")
+async def post_playground_llm_selection_update(playground_llm_selection: str):
+    try:
+        app_state.llm_model = OpenAIModel(model_name=playground_llm_selection)
+        return StatusModal(
+            f"Initialized {playground_llm_selection} as Playground LLM", success=True
+        )
+    except Exception as e:
+        return StatusModal(
+            f"Failed to initialize {playground_llm_selection} as Playground LLM! "
+            + str(e),
+            success=False,
+        )
 
 
 serve()

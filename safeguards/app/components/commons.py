@@ -1,4 +1,4 @@
-from fasthtml.components import A, Details, Div, Li, Summary, Ul, Span
+from fasthtml.components import A, Details, Div, Li, Span, Summary, Ul
 
 
 def SafeGuardsNavBar():
@@ -10,7 +10,7 @@ def SafeGuardsNavBar():
                     Details(
                         Summary("GuardRails"),
                         Ul(
-                            Li(A("Playground", href="#")),
+                            Li(A("Playground", href="/guardrails_playground")),
                             Li(A("Evaluation", href="#")),
                             cls="bg-base-100 rounded-t-none p-2",
                         ),
@@ -27,7 +27,8 @@ def SafeGuardsNavBar():
 
 def StatusModal(message: str, success: bool):
     return Div(
-        Span(message),
-        role="alert",
-        cls="alert alert-success" if success else "alert alert-error",
+        Div(
+            Span(message), cls="alert alert-success" if success else "alert alert-error"
+        ),
+        cls="toast",
     )
