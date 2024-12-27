@@ -1,6 +1,6 @@
 import importlib
 
-from fasthtml.common import Div, Form, Input, Label, Option, Select, Span
+from fasthtml.common import Div, Form, Input, Option, Select, Span
 
 from ..state import AppState
 from .commons import StatusModal
@@ -30,12 +30,16 @@ def GuardrailsPlaygroundLLMSelection():
 
 
 def GuardrailsPlaygroundCheckbox(label: str):
-    return (
-        Label(
-            Input(type="checkbox", cls="checkbox checkbox-primary", name=label),
-            Span(label),
-            cls="flex items-center gap-2",
+    name = label.lower().removesuffix("guardrail")
+    return Form(
+        Input(
+            type="checkbox",
+            cls="checkbox checkbox-primary",
+            name=name,
+            hx_post=f"/playground_guardrail_selection_{name}",
         ),
+        Span(label),
+        cls="flex items-center gap-2",
     )
 
 
@@ -48,13 +52,13 @@ def GuardrailsPlaygroundGuardrailSelection():
         if not cls_name.startswith("__") and cls_name.endswith("Guardrail")
     ]
     return Div(
-        Form(
+        Div(
             Div(
                 Span("Select Guardrails", cls="label-text"),
                 cls="label",
             ),
             *guardrail_checkboxes,
-            cls="flex flex-col gap-4 p-6 rounded-lg shadow-lg",
+            cls="flex flex-col gap-4 p-6 rounded-lg",
         ),
         cls="container mx-auto p-6",
     )
