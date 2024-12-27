@@ -6,8 +6,6 @@ def SafeGuardsNavBar():
         Div(A("SafeGuards", cls="btn btn-ghost text-xl"), cls="flex-1"),
         Div(
             Ul(
-                Li(A("Any Chat", href="#")),
-                Li(A("Any Imagine", href="#")),
                 Li(
                     Details(
                         Summary("GuardRails"),

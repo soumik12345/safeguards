@@ -1,6 +1,7 @@
 from fasthtml.common import FastHTML, FileResponse, Link, serve
 
 from safeguards.app.components.commons import SafeGuardsNavBar
+from safeguards.app.components.landing_page import SafeGuardsLanding
 from safeguards.app.tailwind import add_daisy_and_tailwind
 
 app = FastHTML(hdrs=Link(rel="stylesheet", href="app.css", type="text/css"))
@@ -16,7 +17,7 @@ def get_static(fname: str, ext: str):
 
 @app.get("/")
 def get_index():
-    return SafeGuardsNavBar()
+    return (SafeGuardsNavBar(), SafeGuardsLanding())
 
 
 serve()
