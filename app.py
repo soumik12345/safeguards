@@ -1,10 +1,14 @@
 import os
 
 import wandb
-from fasthtml.common import Div, FastHTML, FileResponse, P, serve
+from fasthtml.common import FastHTML, FileResponse, serve
 
 from safeguards.app.components.commons import SafeGuardsNavBar, StatusModal
-from safeguards.app.components.guardrails_playground import GuardrailsPlayGroundPage
+from safeguards.app.components.guardrails_playground import (
+    GuardrailsPlayGroundPage,
+    PromptInjectionClassifierGuardrailInitialization,
+    PromptInjectionLLMGuardrailInitialization,
+)
 from safeguards.app.components.landing_page import SafeGuardsLanding
 from safeguards.app.components.settings import SettingsForm
 from safeguards.app.state import AppState, SettingState
@@ -94,10 +98,18 @@ async def post_playground_llm_selection_update(playground_llm_selection: str):
 
 @app.post("/playground_guardrail_selection")
 async def update(selected_playground_guardrails: list[str] = None):
-    if not selected_playground_guardrails:
-        return Div(P("No options selected."), style="margin-top: 10px;")
-    selected_labels = ", ".join(selected_playground_guardrails)
-    return Div(P(f"Selected options: {selected_labels}"), style="margin-top: 10px;")
+    guardrail_initialization_ui_components = []
+    if selected_playground_guardrails:
+        for guardrail_name in selected_playground_guardrails:
+            if guardrail_name == "PromptInjectionLLMGuardrail":
+                guardrail_initialization_ui_components.append(
+                    PromptInjectionLLMGuardrailInitialization()
+                )
+            elif guardrail_name == "PromptInjectionClassifierGuardrail":
+                guardrail_initialization_ui_components.append(
+                    PromptInjectionClassifierGuardrailInitialization()
+                )
+    return guardrail_initialization_ui_components
 
 
 serve()

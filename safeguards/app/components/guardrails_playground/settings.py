@@ -2,9 +2,6 @@ import importlib
 
 from fasthtml.common import Div, Form, Input, Label, Option, Select, Span
 
-from ..state import AppState
-from .commons import StatusModal
-
 
 def GuardrailsPlaygroundLLMSelection():
     return Div(
@@ -30,7 +27,6 @@ def GuardrailsPlaygroundLLMSelection():
 
 
 def GuardrailsPlaygroundCheckbox(label: str):
-    # name = label.lower().removesuffix("guardrail")
     return Label(
         Input(
             type="checkbox",
@@ -73,14 +69,4 @@ def GuardrailsPlaygroundSettings():
         GuardrailsPlaygroundLLMSelection(),
         GuardrailsPlaygroundGuardrailSelection(),
         cls="flex flex-col",
-    )
-
-
-def GuardrailsPlayGroundPage(state: AppState):
-    if not state.is_settings_saved:
-        return StatusModal(
-            message="Please save your W&B account settings and API Keys.", success=False
-        )
-    return Div(
-        GuardrailsPlaygroundSettings(), Div("Col 2"), cls="grid grid-cols-2 gap-4 p-4"
     )
