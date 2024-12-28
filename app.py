@@ -1,9 +1,7 @@
 import os
 
-import rich
-import rich.pretty
 import wandb
-from fasthtml.common import FastHTML, FileResponse, serve
+from fasthtml.common import Div, FastHTML, FileResponse, P, serve
 
 from safeguards.app.components.commons import SafeGuardsNavBar, StatusModal
 from safeguards.app.components.guardrails_playground import GuardrailsPlayGroundPage
@@ -94,49 +92,12 @@ async def post_playground_llm_selection_update(playground_llm_selection: str):
         )
 
 
-@app.post("/playground_guardrail_selection_regexentityrecognition")
-async def post_playground_guardrail_selection_regexentityrecognition(
-    regexentityrecognition: str,
-):
-    rich.print(regexentityrecognition)
-
-
-@app.post("/playground_guardrail_selection_transformersentityrecognition")
-async def post_playground_guardrail_selection_transformersentityrecognition(
-    transformersentityrecognition: str,
-):
-    rich.print(transformersentityrecognition)
-
-
-@app.post("/playground_guardrail_selection_promptinjectionclassifier")
-async def post_playground_guardrail_selection_promptinjectionclassifier(
-    promptinjectionclassifier: str,
-):
-    rich.print(promptinjectionclassifier)
-
-
-@app.post("/playground_guardrail_selection_promptinjectionllm")
-async def post_playground_guardrail_selection_promptinjectionllm(
-    promptinjectionllm: str,
-):
-    rich.print(promptinjectionllm)
-
-
-@app.post("/playground_guardrail_selection_openaiprivilegeescalation")
-async def post_playground_guardrail_selection_openaiprivilegeescalation(
-    openaiprivilegeescalation: str,
-):
-    rich.print(openaiprivilegeescalation)
-
-
-@app.post("/playground_guardrail_selection_sqlinjection")
-async def post_playground_guardrail_selection_sqlinjection(sqlinjection: str):
-    rich.print(sqlinjection)
-
-
-@app.post("/playground_guardrail_selection_secretsdetection")
-async def post_playground_guardrail_selection_secretsdetection(secretsdetection: str):
-    rich.print(secretsdetection)
+@app.post("/playground_guardrail_selection")
+async def update(selected_playground_guardrails: list[str] = None):
+    if not selected_playground_guardrails:
+        return Div(P("No options selected."), style="margin-top: 10px;")
+    selected_labels = ", ".join(selected_playground_guardrails)
+    return Div(P(f"Selected options: {selected_labels}"), style="margin-top: 10px;")
 
 
 serve()
