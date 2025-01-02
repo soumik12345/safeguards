@@ -66,3 +66,17 @@ jobs:
           pip install -e ".[dev]"
           huggingface-cli login --token ${{ secrets.HF_TOKEN }}
           python -m pytest -s tests/test_prompt_injection_classifier.py
+  
+  test-evaluation-classification:
+    name: test evaluation classification
+    runs-on: ubuntu-latest
+    env:
+      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip install -U pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+          wandb login --relogin
+          python -m pytest -s tests/test_evaluation_classification.py
