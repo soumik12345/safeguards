@@ -18,6 +18,7 @@ class EvaluationClassifier:
 
     def register_predict_and_score_calls(
         self,
+        failure_condition: str,
         max_predict_and_score_calls: Optional[int] = None,
         save_filepath: Optional[str] = None,
     ):
@@ -30,9 +31,13 @@ class EvaluationClassifier:
             if "Evaluation.summarize" in predict_and_score_call._op_name:
                 break
             elif "Evaluation.predict_and_score" in predict_and_score_call._op_name:
-                self.predict_and_score_calls.append(
-                    self.parse_call(predict_and_score_call)
-                )
+                if eval(
+                    "serialize_input_output_objects(predict_and_score_call.output)['scores']"
+                    + failure_condition
+                ):
+                    self.predict_and_score_calls.append(
+                        self.parse_call(predict_and_score_call)
+                    )
                 count_traces_parsed += 1
                 if count_traces_parsed == max_predict_and_score_calls:
                     break
