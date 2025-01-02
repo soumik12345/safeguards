@@ -46,6 +46,7 @@ class EvaluationClassifier:
 
     def parse_call(self, child_call) -> dict:
         call_dict = {
+            "id": child_call.id,
             "call_name": self._get_call_name_from_op_name(child_call._op_name),
             "inputs": serialize_input_output_objects(child_call.inputs),
             "outputs": serialize_input_output_objects(child_call.output),
