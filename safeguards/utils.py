@@ -11,7 +11,6 @@ from transformers.trainer_callback import (
     TrainerState,
     TrainingArguments,
 )
-from weave.trace.vals import WeaveObject
 
 from .guardrails import GuardrailManager
 from .llm import OpenAIModel
@@ -304,12 +303,3 @@ def remove_class_key(d: Union[Dict, List]):
         for item in d:
             remove_class_key(item)
     return d
-
-
-def serialize_weave_object(self, obj: WeaveObject):
-    serialized_dict = obj._val.__dict__
-    serialized_dict.pop("name", None)
-    serialized_dict.pop("description", None)
-    serialized_dict.pop("_class_name", None)
-    serialized_dict.pop("_bases", None)
-    return serialized_dict
