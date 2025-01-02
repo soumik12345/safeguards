@@ -78,5 +78,5 @@ jobs:
           pip install -U pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -e ".[dev]"
-          wandb login --relogin
+          wandb login --relogin ${{ secrets.WANDB_API_KEY }}
           python -m pytest -s tests/test_evaluation_classification.py
