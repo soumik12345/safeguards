@@ -1,7 +1,8 @@
+import rich
 import weave
 from rich.progress import track
 
-from .trace_utils import serialize_inputs
+from .trace_utils import serialize_input_output_objects
 
 
 class EvaluationTraceParser:
@@ -33,15 +34,15 @@ class EvaluationTraceParser:
                     self.predict_and_score_calls[-1]["child_calls"].append(
                         self.parse_call(child_call)
                     )
-            # rich.print(self.predict_and_score_calls[0]["child_calls"][0])
+            rich.print(self.predict_and_score_calls[0]["child_calls"][0])
             break
 
     def parse_call(self, child_call) -> dict:
         call_dict = {
             "call_id": child_call.id,
             "call_name": self._get_call_name_from_op_name(child_call._op_name),
-            "inputs": serialize_inputs(child_call.inputs),
-            "outputs": dict(child_call.output),
+            "inputs": serialize_input_output_objects(child_call.inputs),
+            "outputs": serialize_input_output_objects(child_call.output),
             "child_calls": [self.parse_call(child) for child in child_call.children()],
         }
         return call_dict

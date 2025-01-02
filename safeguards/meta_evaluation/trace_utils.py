@@ -26,7 +26,7 @@ def serialize_weave_references(data: Any):
         return data
 
 
-def serialize_inputs(inputs: Any) -> dict[str, Any]:
+def serialize_input_output_objects(inputs: Any) -> dict[str, Any]:
     inputs = dict(inputs)
     for key, val in inputs.items():
         if isinstance(val, WeaveObject):
