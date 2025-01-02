@@ -1,4 +1,5 @@
 import importlib
+from typing import Dict, List, Union
 
 import pandas as pd
 import streamlit as st
@@ -10,6 +11,7 @@ from transformers.trainer_callback import (
     TrainerState,
     TrainingArguments,
 )
+from weave.trace.vals import WeaveObject
 
 from .guardrails import GuardrailManager
 from .llm import OpenAIModel
@@ -291,3 +293,23 @@ def initialize_guardrails_on_playground():
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
     )
+
+
+def remove_class_key(d: Union[Dict, List]):
+    if isinstance(d, dict):
+        d.pop("__class__", None)
+        for key, value in d.items():
+            remove_class_key(value)
+    elif isinstance(d, list):
+        for item in d:
+            remove_class_key(item)
+    return d
+
+
+def serialize_weave_object(self, obj: WeaveObject):
+    serialized_dict = obj._val.__dict__
+    serialized_dict.pop("name", None)
+    serialized_dict.pop("description", None)
+    serialized_dict.pop("_class_name", None)
+    serialized_dict.pop("_bases", None)
+    return serialized_dict
