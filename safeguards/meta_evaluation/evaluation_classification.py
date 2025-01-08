@@ -1,6 +1,8 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
+import rich
 import weave
 from rich.progress import track
 
@@ -25,7 +27,7 @@ class EvaluationClassifier:
         count_traces_parsed = 0
         for predict_and_score_call in track(
             self.base_call.children(),
-            description="Parsing predict and score calls",
+            description="Filtering predict and score calls",
             total=max_predict_and_score_calls - 1,
         ):
             if "Evaluation.summarize" in predict_and_score_call._op_name:
@@ -35,12 +37,21 @@ class EvaluationClassifier:
                     "serialize_input_output_objects(predict_and_score_call.output)['scores']"
                     + failure_condition
                 ):
-                    self.predict_and_score_calls.append(
-                        self.parse_call(predict_and_score_call)
-                    )
+                    self.predict_and_score_calls.append(predict_and_score_call)
                 count_traces_parsed += 1
                 if count_traces_parsed == max_predict_and_score_calls:
                     break
+
+        rich.print(
+            "INFO:\tNumber of filtered predict and score calls: ",
+            len(self.predict_and_score_calls),
+        )
+
+        with ThreadPoolExecutor() as executor:
+            self.predict_and_score_calls = list(
+                executor.map(self.parse_call, self.predict_and_score_calls)
+            )
+
         if len(self.predict_and_score_calls) > 0 and save_filepath is not None:
             self.save_calls(save_filepath)
 
