@@ -75,10 +75,16 @@ class EvaluationClassifier:
             json.dump(self.predict_and_score_calls, file, indent=4)
 
     @weave.op()
-    def summarize(self) -> str:
-        for call in track(
-            self.predict_and_score_calls, description="Summarizing calls"
-        ):
-            self.predict_and_score_call_summaries.append(
-                summarize_single_predict_and_score_call(call)
-            )
+    def summarize(self, n_jobs: int = 10) -> str:
+        from joblib import Parallel, delayed
+
+        def process_call(call):
+            return summarize_single_predict_and_score_call(call)
+
+        self.predict_and_score_call_summaries = Parallel(n_jobs=n_jobs)(
+            delayed(process_call)(call) for call in self.predict_and_score_calls
+        )
+
+        rich.print("INFO:\tCompleted summarizing `Evaluation.predict_and_score` calls.")
+
+        return self.predict_and_score_call_summaries
