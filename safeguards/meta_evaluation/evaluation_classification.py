@@ -6,14 +6,17 @@ import rich
 import weave
 from rich.progress import track
 
-from .trace_utils import serialize_input_output_objects
+from .trace_utils import (
+    serialize_input_output_objects,
+    summarize_single_predict_and_score_call,
+)
 
 
 class EvaluationClassifier:
-
     def __init__(self, project: str, call_id: str) -> None:
         self.base_call = weave.init(project).get_call(call_id=call_id)
         self.predict_and_score_calls = []
+        self.predict_and_score_call_summaries = []
 
     def _get_call_name_from_op_name(self, op_name: str) -> str:
         return op_name.split("/")[-1].split(":")[0]
@@ -52,6 +55,8 @@ class EvaluationClassifier:
                 executor.map(self.parse_call, self.predict_and_score_calls)
             )
 
+        rich.print("INFO:\tCompleted parsing `Evaluation.predict_and_score` calls.")
+
         if len(self.predict_and_score_calls) > 0 and save_filepath is not None:
             self.save_calls(save_filepath)
 
@@ -68,3 +73,12 @@ class EvaluationClassifier:
     def save_calls(self, filepath: str):
         with open(filepath, "w") as file:
             json.dump(self.predict_and_score_calls, file, indent=4)
+
+    @weave.op()
+    def summarize(self) -> str:
+        for call in track(
+            self.predict_and_score_calls, description="Summarizing calls"
+        ):
+            self.predict_and_score_call_summaries.append(
+                summarize_single_predict_and_score_call(call)
+            )

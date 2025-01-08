@@ -16,7 +16,8 @@ def test_restricted_terms_detection():
 
     # Create the guardrail with anonymization enabled
     regex_guardrail = RegexEntityRecognitionGuardrail(
-        use_defaults=False, should_anonymize=True  # Don't use default PII patterns
+        use_defaults=False,
+        should_anonymize=True,  # Don't use default PII patterns
     )
 
     # Test statistics
