@@ -9,14 +9,15 @@ try:
 except ImportError:
     import_failed = True
     print(
-        "The `transformers` package is required to use the CoherenceScorer, please run `pip install transformers`"
+        "The `transformers` package is required to use the SourcecodeDetectionGuardrail, please run `pip install transformers`"
     )
 from safeguards.guardrails.base import Guardrail
 
 
 class SourceCodeDetectionGuardrail(Guardrail):
     """
-    A class to detect source code within text using a pre-trained model.
+    A guardrail that uses a pre-trained text-classification model to classify prompts
+     to detect source code within the prompts.
 
     Attributes:
         device (str): The device to run the model on, default is 'cpu'.

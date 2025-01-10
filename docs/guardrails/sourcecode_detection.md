@@ -1,3 +1,3 @@
 # Sourcecode Detection
 
-::: guardrails_genie.guardrails.sourcecode_detection.sourcecode_detection
+::: safeguards.guardrails.sourcecode_detection.sourcecode_detection
