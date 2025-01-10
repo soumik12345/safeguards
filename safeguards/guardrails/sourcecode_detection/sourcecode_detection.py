@@ -11,10 +11,10 @@ except ImportError:
     print(
         "The `transformers` package is required to use the CoherenceScorer, please run `pip install transformers`"
     )
-from guardrails_genie.guardrails.base import Guardrail
+from safeguards.guardrails.base import Guardrail
 
 
-class SourceCodeDetector(Guardrail):
+class SourceCodeDetectionGuardrail(Guardrail):
     """
     A class to detect source code within text using a pre-trained model.
 
