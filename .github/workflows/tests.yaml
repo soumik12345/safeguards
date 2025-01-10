@@ -68,7 +68,7 @@ jobs:
           python -m pytest -s tests/test_prompt_injection_classifier.py
 
   test-sourcecode-detection-classifier:
-    name: test prompt injection classifier guardrail
+    name: test sourcecode detection  guardrail
     runs-on: ubuntu-latest
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
