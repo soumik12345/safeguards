@@ -8,4 +8,4 @@
     }
     ```
 
-::: guardrails_genie.regex_model
+::: safeguards.regex_model

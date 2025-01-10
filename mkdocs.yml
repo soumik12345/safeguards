@@ -1,9 +1,9 @@
 # mkdocs.yml
-site_name: Guardrails Genie
+site_name: Safeguards
 
 theme:
   name: material
-  logo: assets/wandb_logo.svg
+  logo: assets/safeguards-logo-icon.png
   favicon: assets/wandb_logo.svg
   palette: 
     # Palette toggle for light mode
@@ -72,13 +72,16 @@ nav:
       - LLM Judge for Entity Recognition Guardrail: 'guardrails/entity_recognition/llm_judge_entity_recognition_guardrail.md'
     - Prompt Injection Guardrails:
       - Classifier Guardrail: 'guardrails/prompt_injection/classifier.md'
-      - Survey Guardrail: 'guardrails/prompt_injection/llm_survey.md'
+      - LLM Guardrail: 'guardrails/prompt_injection/llm_guardrail.md'
     - Secrets Detection Guardrail: "guardrails/secrets_detection.md"
     - Source Code Guardrail: "guardrails/sourcecode_detection.md"
+    - Privilege Escalation Guardrail: "guardrails/privilege_escalation.md"
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'
   - RegexModel: 'regex_model.md'
-  - Train Classifier: 'train_classifier.md'
+  - Training:
+    - Train Classifier: 'train/train_classifier.md'
+    - Train Llama Guard: 'train/train_llama_guard.md'
   - Utils: 'utils.md'
 
 repo_url: https://github.com/soumik12345/guardrails-genie

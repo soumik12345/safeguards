@@ -169,12 +169,11 @@ binary-classifier/
 wandb/
 artifacts/
 evaluation_results/
-
+.cache_dir/
+checkpoints/
+.DS_Store
 build
 dist
 htmlcov
-.coverage
 guardrails_genie.egg-info
 .hypothesis
-# macOS specific files
-.DS_Store

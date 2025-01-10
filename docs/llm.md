@@ -1,3 +1,3 @@
 # LLM
 
-::: guardrails_genie.llm
+::: safeguards.llm
