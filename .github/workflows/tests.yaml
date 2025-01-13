@@ -66,7 +66,22 @@ jobs:
           pip install -e ".[dev]"
           huggingface-cli login --token ${{ secrets.HF_TOKEN }}
           python -m pytest -s tests/test_prompt_injection_classifier.py
-  
+
+  test-sourcecode-detection-classifier:
+    name: test sourcecode detection  guardrail
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip install -U pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+          huggingface-cli login --token ${{ secrets.HF_TOKEN }}
+          python -m pytest -s tests/test_sourcecode_detection.py
+
   test-evaluation-classification:
     name: test evaluation classification
     runs-on: ubuntu-latest

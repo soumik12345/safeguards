@@ -74,6 +74,7 @@ nav:
       - Classifier Guardrail: 'guardrails/prompt_injection/classifier.md'
       - LLM Guardrail: 'guardrails/prompt_injection/llm_guardrail.md'
     - Secrets Detection Guardrail: "guardrails/secrets_detection.md"
+    - Source Code Guardrail: "guardrails/sourcecode_detection.md"
     - Privilege Escalation Guardrail: "guardrails/privilege_escalation.md"
   - LLM: 'llm.md'
   - Metrics: 'metrics.md'

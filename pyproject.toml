@@ -15,7 +15,7 @@ dependencies = [
     "google-generativeai>=0.8.3",
     "hyperscan>=0.7.8",
     "openai>=1.52.2",
-    "weave @ git+https://github.com/wandb/weave@feat/eval-progressbar",
+    "weave>=0.51.27",
     "streamlit>=1.40.1",
     "python-dotenv>=1.0.1",
     "watchdog>=6.0.0",
