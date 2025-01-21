@@ -4,8 +4,8 @@ from typing import ClassVar, Dict, List, Optional
 import weave
 from pydantic import BaseModel
 
-from ...regex_model import RegexModel
-from ..base import Guardrail
+from safeguards.guardrails.base import Guardrail
+from safeguards.regex_model import RegexModel
 
 
 class RegexEntityRecognitionResponse(BaseModel):

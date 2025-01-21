@@ -20,7 +20,6 @@ from safeguards.guardrails.privilege_escalation import (
 from safeguards.guardrails.secrets_detection import SecretsDetectionGuardrail
 from safeguards.guardrails.sourcecode_detection import SourceCodeDetectionGuardrail
 
-
 from .manager import GuardrailManager
 
 __all__ = [

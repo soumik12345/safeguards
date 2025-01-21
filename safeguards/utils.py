@@ -11,8 +11,8 @@ from transformers.trainer_callback import (
     TrainingArguments,
 )
 
-from .guardrails import GuardrailManager
-from .llm import OpenAIModel
+from safeguards.guardrails import GuardrailManager
+from safeguards.llm import OpenAIModel
 
 load_dotenv()
 

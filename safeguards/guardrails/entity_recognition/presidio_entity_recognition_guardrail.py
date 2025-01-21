@@ -10,7 +10,7 @@ from presidio_analyzer import (
 from presidio_anonymizer import AnonymizerEngine
 from pydantic import BaseModel
 
-from ..base import Guardrail
+from safeguards.guardrails.base import Guardrail
 
 
 class PresidioEntityRecognitionResponse(BaseModel):
