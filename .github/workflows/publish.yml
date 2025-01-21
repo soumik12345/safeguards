@@ -7,43 +7,29 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # FROM https://github.com/pypa/gh-action-pypi-publish
+    environment:
+      name: pypi
+      url: https://pypi.org/p/python-template-zuppif
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - name: 🛎️ Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: 📦 Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.10" # Matching your requires-python >= 3.10
+          python-version-file: ".python-version"
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libhyperscan-dev  # Required for hyperscan
+      - name: 🦾 Install the project
+        run: uv sync
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      - name: 🦾 Build
+        run: uv build
 
-      - name: Install build dependencies
-        run: |
-          uv pip install build twine
-          # Install any build-time dependencies
-          uv pip install setuptools wheel
-
-      - name: Build package
-        run: |
-          # Clean any previous builds
-          rm -rf dist/ build/ *.egg-info
-          python -m build
-
-      - name: Check package
-        run: |
-          twine check dist/*
-
-      - name: Publish
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          twine upload dist/*
+      - name: 🚀 Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
