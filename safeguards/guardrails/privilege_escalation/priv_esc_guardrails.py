@@ -5,12 +5,12 @@ import weave
 from pydantic import BaseModel, Field
 from transformers import MobileBertForSequenceClassification, MobileBertTokenizer
 
-from ...llm import OpenAIModel
-from ..base import Guardrail
-from .prompts import (
+from safeguards.guardrails.base import Guardrail
+from safeguards.guardrails.privilege_escalation.prompts import (
     PRIVILEGE_ESCALATION_SYSTEM_PROMPT,
     PRIVILEGE_ESCALATION_USER_PROMPT,
 )
+from safeguards.llm import OpenAIModel
 
 
 class OpenAIPrivEscResponse(BaseModel):

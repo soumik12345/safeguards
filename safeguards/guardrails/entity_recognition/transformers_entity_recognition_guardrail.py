@@ -4,7 +4,7 @@ import weave
 from pydantic import BaseModel
 from transformers import AutoConfig, pipeline
 
-from ..base import Guardrail
+from safeguards.guardrails.base import Guardrail
 
 
 class TransformersEntityRecognitionResponse(BaseModel):

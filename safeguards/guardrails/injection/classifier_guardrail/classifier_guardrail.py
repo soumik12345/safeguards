@@ -2,11 +2,13 @@ from typing import Optional
 
 import weave
 
-from ...base import Guardrail
-from .huggingface_classifier_guardrail import (
+from safeguards.guardrails.base import Guardrail
+from safeguards.guardrails.injection.classifier_guardrail.huggingface_classifier_guardrail import (
     PromptInjectionHuggingFaceClassifierGuardrail,
 )
-from .llama_prompt_guardrail import PromptInjectionLlamaGuardrail
+from safeguards.guardrails.injection.classifier_guardrail.llama_prompt_guardrail import (
+    PromptInjectionLlamaGuardrail,
+)
 
 
 class PromptInjectionClassifierGuardrail(Guardrail):

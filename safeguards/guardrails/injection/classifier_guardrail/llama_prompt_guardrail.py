@@ -10,7 +10,7 @@ import weave
 from safetensors.torch import load_model
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from ...base import Guardrail
+from safeguards.guardrails.base import Guardrail
 
 
 class PromptInjectionLlamaGuardrail(Guardrail):

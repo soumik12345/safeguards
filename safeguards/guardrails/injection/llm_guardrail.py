@@ -4,8 +4,8 @@ from typing import Optional
 import weave
 from pydantic import BaseModel
 
-from ...llm import OpenAIModel
-from ..base import Guardrail
+from safeguards.guardrails.base import Guardrail
+from safeguards.llm import OpenAIModel
 
 
 class LLMGuardrailResponse(BaseModel):

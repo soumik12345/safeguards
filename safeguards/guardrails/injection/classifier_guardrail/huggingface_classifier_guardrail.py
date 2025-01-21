@@ -6,7 +6,7 @@ import weave
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 from transformers.pipelines.base import Pipeline
 
-from ...base import Guardrail
+from safeguards.guardrails.base import Guardrail
 
 
 class PromptInjectionHuggingFaceClassifierGuardrail(Guardrail):

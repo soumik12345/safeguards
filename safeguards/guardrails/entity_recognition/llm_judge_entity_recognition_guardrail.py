@@ -4,8 +4,8 @@ import instructor
 import weave
 from pydantic import BaseModel, Field
 
-from ...llm import OpenAIModel
-from ..base import Guardrail
+from safeguards.guardrails.base import Guardrail
+from safeguards.llm import OpenAIModel
 
 
 class TermMatch(BaseModel):
