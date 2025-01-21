@@ -1,11 +1,7 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "safeguards"
 version = "0.0.1"
-description = ""
+description = "A comprehensive collection of guardrails for securing and validating prompts in AI applications"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -67,8 +63,15 @@ test = [
     "hypothesis>=6.122.1"
 ]
 
-[tool.setuptools]
-py-modules = ["safeguards"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["safeguards"]
+
+[tool.ruff]
+target-version = "py310"
 
 [tool.pytest.ini_options]
 pythonpath = "."
