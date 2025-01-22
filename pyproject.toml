@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "safeguards"
-version = "0.0.3"
+version = "0.0.5"
 description = ""
 readme = "README.md"
 requires-python = ">=3.10"
@@ -69,6 +69,8 @@ test = [
 
 [tool.setuptools]
 packages = ["safeguards"]
+package-dir = {"" = "."}
+package-data = {"safeguards" = ["**/*"]}
 
 [tool.pytest.ini_options]
 pythonpath = "."
