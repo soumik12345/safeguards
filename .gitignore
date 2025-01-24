@@ -177,3 +177,4 @@ dist
 htmlcov
 guardrails_genie.egg-info
 .hypothesis
+**.json

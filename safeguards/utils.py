@@ -1,4 +1,5 @@
 import importlib
+from typing import Dict, List, Union
 
 import pandas as pd
 import streamlit as st
@@ -291,3 +292,14 @@ def initialize_guardrails_on_playground():
     st.session_state.guardrails_manager = GuardrailManager(
         guardrails=st.session_state.guardrails
     )
+
+
+def remove_class_key(d: Union[Dict, List]):
+    if isinstance(d, dict):
+        d.pop("__class__", None)
+        for key, value in d.items():
+            remove_class_key(value)
+    elif isinstance(d, list):
+        for item in d:
+            remove_class_key(item)
+    return d
